@@ -1,236 +1,611 @@
 <!--
     Developer: Vecto. (Tim Hauke)
-    Copyright: Is by the Developer but everyone can use it as Template.
+    Copyright: Free to use as a template.
     License: https://github.com/VectoDE/HTML-Template/blob/main/LICENSE
     Repository: https://github.com/VectoDE/HTML-Template
 -->
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de" prefix="og: https://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive HTML5 Example</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="content-language" content="de">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Umfassende HTML5-Demoseite mit nahezu allen Elementen, Attributen und Best Practices.">
+    <meta name="keywords" content="HTML5, Template, Demo, Enterprise">
+    <meta name="author" content="Vecto (Tim Hauke)">
+    <meta name="application-name" content="Enterprise HTML Template">
+    <meta name="theme-color" content="#1f4b99">
+    <meta name="color-scheme" content="light dark">
+    <meta name="format-detection" content="telephone=no">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Enterprise HTML5 Template">
+    <meta property="og:description" content="Ein vollständiges HTML-Demoprojekt, das sämtliche Elemente und Anwendungsfälle illustriert.">
+    <meta property="og:url" content="https://github.com/VectoDE/HTML-Template">
+    <meta property="og:locale" content="de_DE">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://github.com/VectoDE/HTML-Template">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='24' fill='%231f4b99'/%3E%3Ctext x='60' y='78' font-size='72' text-anchor='middle' fill='white' font-family='Segoe UI, sans-serif'%3EH%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABE0lEQVR4nO3RMQEAAAgDIN8/9CwYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPwdzVcAAb3utFYAAAAASUVORK5CYII=">
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Enterprise%20HTML%20Template%22,%22short_name%22:%22HTML%20Template%22,%22display%22:%22standalone%22}">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
+    <title>Enterprise HTML5 Template</title>
 </head>
-<body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Services</a></li>
-                <li><a href="#">Portfolio</a></li>
-                <li><a href="#">Contact</a></li>
+<body id="top" itemscope itemtype="https://schema.org/WebPage">
+    <noscript>
+        <div class="noscript-warning">Diese Seite nutzt JavaScript für interaktive Beispiele. Bitte aktivieren Sie JavaScript für die vollständige Erfahrung.</div>
+    </noscript>
+    <a class="skip-link" href="#inhalt">Zum Hauptinhalt springen</a>
+    <header class="site-header" role="banner">
+        <div class="brand-area">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 120'%3E%3Crect width='320' height='120' rx='28' fill='%231f4b99'/%3E%3Ctext x='50%' y='55%' fill='white' font-size='48' font-family='Segoe UI, sans-serif' text-anchor='middle'%3EHTML%3C/text%3E%3Ctext x='50%' y='82%' fill='%23b6c8ff' font-size='28' font-family='Segoe UI, sans-serif' text-anchor='middle'%3ETemplate%3C/text%3E%3C/svg%3E" alt="HTML Template Logo" width="160" height="60" loading="lazy">
+            <div>
+                <p class="badge" role="status">Version 2024.1</p>
+                <data value="2024" itemprop="datePublished">Aktualisiert: <time datetime="2024-06-01">01. Juni 2024</time></data>
+            </div>
+        </div>
+        <nav aria-label="Hauptnavigation">
+            <ul class="nav-list">
+                <li><a href="#inhalt">Einführung</a></li>
+                <li><a href="#typografie">Typografie</a></li>
+                <li><a href="#listen">Listen</a></li>
+                <li><a href="#tabellen">Tabellen</a></li>
+                <li><a href="#formulare">Formulare</a></li>
+                <li><a href="#medien">Medien</a></li>
+                <li><a href="#interaktiv">Interaktivität</a></li>
+                <li><a href="#daten">Daten &amp; Semantik</a></li>
+                <li><a href="#layout">Layout</a></li>
             </ul>
-            <form role="search">
-                <input type="text" placeholder="Search...">
-                <button type="submit">
-                    <i class="fa fa-search"></i>
-                </button>
-            </form>
         </nav>
-        <h1>HTML5 Comprehensive Example</h1>
-        <figure>
-            <img src="img/logo.png" alt="logo">
-            <figcaption>HTML5 Comprehensive Example</figcaption>
-        </figure>
+        <form class="nav-search" role="search" aria-label="Schnellsuche">
+            <label for="nav-search" class="visually-hidden">Suchbegriff</label>
+            <input id="nav-search" type="search" name="q" placeholder="Suche im Template" autocomplete="off">
+            <button type="submit">Suchen</button>
+        </form>
     </header>
 
-    <main>
-        <section>
-            <h2>Introduction</h2>
-            <p>Welcome to this comprehensive example demonstrating all HTML5 elements.</p>
-            <article>
-                <h3>Section 1</h3>
-                <p>This is an example article within a section.</p>
-                <aside>
-                    <h4>Related Info</h4>
-                    <p>Additional related information can be placed in an aside element.</p>
-                </aside>
+    <main id="inhalt" class="site-main" role="main">
+        <section class="intro" aria-labelledby="intro-heading">
+            <div class="intro-content">
+                <h1 id="intro-heading">Enterprise HTML5 Referenz Template</h1>
+                <p>
+                    Dieses Dokument demonstriert den Einsatz nahezu aller HTML5-Elemente in sinnvollen Kontexten.
+                    Es dient als Ausgangspunkt für Enterprise-Projekte, Styleguides und Dokumentationen.
+                </p>
+                <p>
+                    Der Code berücksichtigt Semantik, Barrierefreiheit (A11y), Internationalisierung (i18n),
+                    SEO-Metadaten sowie moderne Best Practices.<br>
+                    <strong>Hinweis:</strong> Viele Beispiele nutzen Platzhalterinhalte, um die Elemente zu illustrieren.
+                </p>
+                <details class="intro-details">
+                    <summary>Was macht dieses Template besonders?</summary>
+                    <ul>
+                        <li>Klare Struktur mit Navigationsanker und Inhaltsverzeichnis</li>
+                        <li>Demonstration aller Formularelemente, Medien und Semantik-Tags</li>
+                        <li>Integration von Microdata, strukturierte Daten und ARIA-Rollen</li>
+                        <li>Beispiele für Canvas, SVG, MathML, Custom Elements und Dialoge</li>
+                    </ul>
+                </details>
+            </div>
+            <aside class="intro-aside" role="complementary">
+                <h2>Kurzinformationen</h2>
+                <ul class="tags">
+                    <li><span lang="en" translate="no">HTML Living Standard</span></li>
+                    <li>WCAG 2.2 Orientierung</li>
+                    <li>Responsive &amp; Druck-optimiert</li>
+                </ul>
+                <blockquote cite="https://www.w3.org/TR/html52/">
+                    <p>„HTML ist die Grundlage moderner Web-Anwendungen.“</p>
+                    <footer>&mdash; W3C HTML Spezifikation</footer>
+                </blockquote>
+            </aside>
+        </section>
+
+        <section id="typografie" aria-labelledby="typografie-heading">
+            <h2 id="typografie-heading">Typografie &amp; Inline-Semantik</h2>
+            <article class="card">
+                <h3>Textauszeichnungen</h3>
+                <p>
+                    <strong>Fett</strong>, <em>kursiv</em>, <b>bedeutungsvoll</b>, <i>stilistisch</i>,
+                    <u>unterstrichen</u>, <mark>markiert</mark>, <small>Kleingedrucktes</small>,
+                    <del>entfernt</del>, <ins>hinzugefügt</ins> und <span class="highlight">hervorgehoben</span>.
+                </p>
+                <p>
+                    <abbr title="HyperText Markup Language">HTML</abbr> definiert <dfn>Elemente</dfn>,
+                    die bestimmte Bedeutungen tragen. Verwenden Sie <code>&lt;code&gt;</code> für Inline-Code,
+                    <samp>Ausgabe</samp> für Ergebnisse, <kbd>Ctrl</kbd>+<kbd>S</kbd> für Tastatureingaben,
+                    <var>x</var> für Variablen, <cite>Quellenangaben</cite>,
+                    <q cite="https://developer.mozilla.org">Zitate</q> und <time datetime="2024-06-01">Zeitangaben</time>.
+                </p>
+                <p>
+                    Wissenschaftliche Formeln: H<sub>2</sub>O, E = mc<sup>2</sup>,<br>
+                    Bidirektionaler Text: <bdo dir="rtl">!ןימדאה לוכי</bdo>, eingebettet mit <bdi dir="auto">مرحبا</bdi>.<br>
+                    Ruby-Annotation: <ruby>漢<rp>(</rp><rt>hàn</rt><rp>)</rp>字<rp>(</rp><rt>zì</rt><rp>)</rp></ruby>.
+                </p>
+                <pre class="code-block" aria-label="Codebeispiel"><code>&lt;pre&gt;Formatierter Text&lt;/pre&gt;
+function greet(name) {
+    console.log(`Hallo ${name}!`);
+}
+</code></pre>
+                <hr>
+                <p>
+                    Lange URLs können mit &lt;wbr&gt; getrennt werden: https://enterprise<wbr>.example<wbr>.com<wbr>/docs<wbr>/api.
+                </p>
             </article>
         </section>
 
-        <section>
-            <h2>Media Elements</h2>
-            <figure>
-                <img src="img/example.jpg" alt="example image">
-                <figcaption>Example Image</figcaption>
-            </figure>
-            <audio controls>
-                <source src="audio/example.mp3" type="audio/mp3">
-                <source src="audio/example.ogg" type="audio/ogg">
-                Your browser does not support the audio element.
-            </audio>
-            <video controls width="250">
-                <source src="/media/cc0-videos/flower.webm" type="video/webm" />
-                <source src="/media/cc0-videos/flower.mp4" type="video/mp4" />
-                Download the
-                <a href="/media/cc0-videos/flower.webm">WEBM</a>
-                or
-                <a href="/media/cc0-videos/flower.mp4">MP4</a>
-                video.
-            </video>
-            <object data="document.pdf" type="application/pdf" width="100%" height="500">
-                <p>Your browser does not support PDFs.
-                    <a href="document.pdf">Download the PDF</a>.
-                </p>
-            </object>
+        <section id="listen" aria-labelledby="listen-heading">
+            <h2 id="listen-heading">Listen &amp; Aufzählungen</h2>
+            <div class="grid">
+                <article class="card">
+                    <h3>Ungeordnete Liste</h3>
+                    <ul>
+                        <li>Standardliste</li>
+                        <li>Verschachtelt
+                            <ul>
+                                <li>Ebene 2</li>
+                                <li>Ebene 2</li>
+                            </ul>
+                        </li>
+                        <li>Stilisierte Einträge</li>
+                    </ul>
+                </article>
+                <article class="card">
+                    <h3>Geordnete Liste</h3>
+                    <ol start="3" type="I" reversed>
+                        <li>Priorität 3</li>
+                        <li>Priorität 2</li>
+                        <li>Priorität 1</li>
+                    </ol>
+                </article>
+                <article class="card">
+                    <h3>Definitionsliste</h3>
+                    <dl>
+                        <dt>Frontend</dt>
+                        <dd>Visuelle Darstellung und Interaktion.</dd>
+                        <dt>Backend</dt>
+                        <dd>Geschäftslogik und Datenhaltung.</dd>
+                    </dl>
+                </article>
+                <article class="card">
+                    <h3>Menü &amp; Navigation</h3>
+                    <menu type="toolbar" aria-label="Sekundärnavigation">
+                        <li><button type="button">Aktion</button></li>
+                        <li><button type="button">Export</button></li>
+                        <li><button type="button">Teilen</button></li>
+                    </menu>
+                </article>
+            </div>
         </section>
 
-        <section>
-            <h2>Forms and Inputs</h2>
-            <form>
-                <label for="text">Text Input:</label>
-                <input type="text" id="text" name="text"><br>
+        <section id="tabellen" aria-labelledby="tabellen-heading">
+            <h2 id="tabellen-heading">Tabellen &amp; Datenvisualisierung</h2>
+            <div class="table-wrapper">
+                <table>
+                    <caption>Projektstatusübersicht</caption>
+                    <colgroup>
+                        <col span="1" class="col-standort">
+                        <col span="1" class="col-status">
+                        <col span="1" class="col-progress">
+                        <col span="1" class="col-zeit">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th scope="col">Standort</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Fortschritt</th>
+                            <th scope="col">Deadline</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Berlin</th>
+                            <td>In Umsetzung</td>
+                            <td><progress value="0.7" max="1">70%</progress></td>
+                            <td><time datetime="2024-09-01">01.09.2024</time></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">München</th>
+                            <td>Analysephase</td>
+                            <td><progress value="0.35" max="1">35%</progress></td>
+                            <td><time datetime="2024-12-15">15.12.2024</time></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Hamburg</th>
+                            <td>Abgeschlossen</td>
+                            <td><progress value="1" max="1">100%</progress></td>
+                            <td><time datetime="2024-03-30">30.03.2024</time></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4">Bericht erstellt am <time datetime="2024-06-01">01.06.2024</time></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <figure class="chart" role="img" aria-label="Vergleich der Quartalsumsätze">
+                <figcaption>Quartalsumsätze (Darstellung via Inline-SVG)</figcaption>
+                <svg viewBox="0 0 320 160" role="presentation" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#4f83ff"/>
+                            <stop offset="100%" stop-color="#1f4b99"/>
+                        </linearGradient>
+                    </defs>
+                    <g fill="url(#barGradient)">
+                        <rect x="40" y="40" width="40" height="80" rx="6"></rect>
+                        <rect x="120" y="20" width="40" height="100" rx="6"></rect>
+                        <rect x="200" y="60" width="40" height="60" rx="6"></rect>
+                        <rect x="280" y="10" width="40" height="110" rx="6"></rect>
+                    </g>
+                    <text x="60" y="140" text-anchor="middle">Q1</text>
+                    <text x="140" y="140" text-anchor="middle">Q2</text>
+                    <text x="220" y="140" text-anchor="middle">Q3</text>
+                    <text x="300" y="140" text-anchor="middle">Q4</text>
+                </svg>
+            </figure>
+        </section>
 
-                <label for="password">Password Input:</label>
-                <input type="password" id="password" name="password"><br>
+        <section id="formulare" aria-labelledby="formulare-heading">
+            <h2 id="formulare-heading">Formulare &amp; Eingaben</h2>
+            <form class="form-grid" action="#" method="post" autocomplete="on">
+                <fieldset>
+                    <legend>Persönliche Daten</legend>
+                    <label for="fname">Vorname</label>
+                    <input id="fname" name="fname" type="text" placeholder="Max" required>
 
-                <label for="email">Email Input:</label>
-                <input type="email" id="email" name="email"><br>
+                    <label for="lname">Nachname</label>
+                    <input id="lname" name="lname" type="text" placeholder="Mustermann" autocomplete="family-name">
 
-                <label for="url">URL Input:</label>
-                <input type="url" id="url" name="url"><br>
+                    <label for="email">E-Mail</label>
+                    <input id="email" name="email" type="email" placeholder="max@example.com" autocomplete="email">
 
-                <label for="tel">Telephone Input:</label>
-                <input type="tel" id="tel" name="tel"><br>
+                    <label for="tel">Telefon</label>
+                    <input id="tel" name="tel" type="tel" placeholder="+49 30 1234567" autocomplete="tel">
 
-                <label for="number">Number Input:</label>
-                <input type="number" id="number" name="number" min="0" max="10"><br>
+                    <label for="url">Website</label>
+                    <input id="url" name="url" type="url" placeholder="https://example.com">
 
-                <label for="range">Range Input:</label>
-                <input type="range" id="range" name="range" min="0" max="100"><br>
+                    <label for="birthday">Geburtstag</label>
+                    <input id="birthday" name="birthday" type="date">
 
-                <label for="date">Date Input:</label>
-                <input type="date" id="date" name="date"><br>
+                    <label for="appt">Termin</label>
+                    <input id="appt" name="appt" type="datetime-local">
 
-                <label for="month">Month Input:</label>
-                <input type="month" id="month" name="month"><br>
+                    <label for="color">Lieblingsfarbe</label>
+                    <input id="color" name="color" type="color" value="#1f4b99">
+                </fieldset>
 
-                <label for="week">Week Input:</label>
-                <input type="week" id="week" name="week"><br>
+                <fieldset>
+                    <legend>Einstellungen</legend>
+                    <label for="number">Teamgröße</label>
+                    <input id="number" name="number" type="number" min="1" max="50" value="8">
 
-                <label for="time">Time Input:</label>
-                <input type="time" id="time" name="time"><br>
+                    <label for="range">Budget (in Tsd. €)</label>
+                    <input id="range" name="range" type="range" min="0" max="100" value="45" oninput="budget.value = range.value">
+                    <output id="budget" for="range">45</output>
 
-                <label for="datetime-local">Date and Time Input:</label>
-                <input type="datetime-local" id="datetime-local" name="datetime-local"><br>
+                    <label for="month">Startmonat</label>
+                    <input id="month" name="month" type="month">
 
-                <label for="color">Color Input:</label>
-                <input type="color" id="color" name="color"><br>
+                    <label for="week">Sprint-Woche</label>
+                    <input id="week" name="week" type="week">
 
-                <label for="checkbox">Checkbox:</label>
-                <input type="checkbox" id="checkbox" name="checkbox"><br>
+                    <label for="time">Daily Time</label>
+                    <input id="time" name="time" type="time">
 
-                <label for="radio">Radio Button:</label>
-                <input type="radio" id="radio" name="radio"><br>
+                    <label for="select">Status</label>
+                    <select id="select" name="select">
+                        <optgroup label="Aktiv">
+                            <option value="running">Laufend</option>
+                            <option value="planning">In Planung</option>
+                        </optgroup>
+                        <optgroup label="Passiv">
+                            <option value="paused">Pausiert</option>
+                            <option value="completed">Abgeschlossen</option>
+                        </optgroup>
+                    </select>
 
-                <label for="file">File Input:</label>
-                <input type="file" id="file" name="file"><br>
+                    <label for="skills">Kompetenzen</label>
+                    <select id="skills" name="skills" multiple size="4">
+                        <option>HTML</option>
+                        <option>CSS</option>
+                        <option>JavaScript</option>
+                        <option>Accessibility</option>
+                    </select>
 
-                <label for="select">Select Dropdown:</label>
-                <select id="select" name="select">
-                    <option value="option1">Option 1</option>
-                    <option value="option2">Option 2</option>
-                    <option value="option3">Option 3</option>
-                </select><br>
+                    <label for="datalist">Bevorzugter Browser</label>
+                    <input id="datalist" name="browser" list="browser-list" placeholder="Browser wählen">
+                    <datalist id="browser-list">
+                        <option value="Chrome"></option>
+                        <option value="Firefox"></option>
+                        <option value="Safari"></option>
+                        <option value="Edge"></option>
+                        <option value="Opera"></option>
+                    </datalist>
+                </fieldset>
 
-                <label for="textarea">Textarea:</label>
-                <textarea id="textarea" name="textarea"></textarea><br>
+                <fieldset>
+                    <legend>Uploads &amp; Aktionen</legend>
+                    <label for="bio">Kurzbiografie</label>
+                    <textarea id="bio" name="bio" rows="4" placeholder="Beschreiben Sie Ihre Rolle..."></textarea>
 
-                <label for="datalist">Datalist:</label>
-                <input list="browsers" id="myBrowser" name="myBrowser" />
-                <datalist id="browsers">
-                    <option value="Chrome"></option>
-                    <option value="Firefox"></option>
-                    <option value="Opera"></option>
-                    <option value="Safari"></option>
-                    <option value="Microsoft Edge"></option>
-                </datalist><br>
+                    <label for="file">Datei-Upload</label>
+                    <input id="file" name="file" type="file" accept=".pdf,.docx" multiple>
 
-                <button type="submit">Submit</button>
+                    <label>Newsletter</label>
+                    <div class="form-row">
+                        <label><input type="radio" name="newsletter" value="yes" checked> Ja</label>
+                        <label><input type="radio" name="newsletter" value="no"> Nein</label>
+                    </div>
+
+                    <label><input type="checkbox" name="terms" required> Nutzungsbedingungen akzeptieren</label>
+
+                    <div class="form-buttons">
+                        <button type="submit">Absenden</button>
+                        <button type="reset">Zurücksetzen</button>
+                        <button type="button" data-open-dialog="#feedbackDialog">Feedback</button>
+                    </div>
+                </fieldset>
             </form>
         </section>
 
-        <section>
-            <h2>Tables</h2>
-            <table>
-                <caption>Sample Table</caption>
-                <thead>
-                    <tr>
-                        <th scope="col">Header 1</th>
-                        <th scope="col">Header 2</th>
-                        <th scope="col">Header 3</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <th scope="row">Row 1</th>
-                        <td>Cell 1</td>
-                        <td>Cell 2</td>
-                        <td>Cell 3</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Row 2</th>
-                        <td>Cell 4</td>
-                        <td>Cell 5</td>
-                        <td>Cell 6</td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td>Footer 1</td>
-                        <td>Footer 2</td>
-                        <td>Footer 3</td>
-                    </tr>
-                </tfoot>
-            </table>
+        <section id="medien" aria-labelledby="medien-heading">
+            <h2 id="medien-heading">Medien &amp; Einbettungen</h2>
+            <div class="media-grid">
+                <figure>
+                    <picture>
+                        <source srcset="https://via.placeholder.com/600x300.webp" type="image/webp">
+                        <img src="https://via.placeholder.com/600x300.png" alt="Beispielbild" width="600" height="300" loading="lazy">
+                    </picture>
+                    <figcaption>Responsive Bildausgabe via &lt;picture&gt;</figcaption>
+                </figure>
+
+                <figure>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='160'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0' x2='0' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%234f83ff'/%3E%3Cstop offset='1' stop-color='%231f4b99'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='320' height='160' fill='url(%23grad)' rx='24'/%3E%3Ctext x='50%25' y='52%25' fill='white' font-size='48' font-family='Segoe UI, sans-serif' text-anchor='middle'%3ESVG%3C/text%3E%3C/svg%3E" alt="Inline SVG" usemap="#demo-map" width="320" height="160">
+                    <figcaption>Bild mit Image-Map</figcaption>
+                    <map name="demo-map">
+                        <area shape="rect" coords="0,0,160,160" href="https://developer.mozilla.org" alt="MDN" target="_blank">
+                        <area shape="rect" coords="160,0,320,160" href="https://www.w3.org" alt="W3C" target="_blank">
+                    </map>
+                </figure>
+
+                <figure>
+                    <audio controls preload="metadata">
+                        <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3" type="audio/mpeg">
+                        <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.ogg" type="audio/ogg">
+                        Ihr Browser unterstützt das Audio-Element nicht.
+                    </audio>
+                    <figcaption>Audio mit Mehrfachquellen</figcaption>
+                </figure>
+
+                <figure>
+                    <video controls width="320" poster="https://via.placeholder.com/640x360.png" preload="metadata">
+                        <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+                        <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm" type="video/webm">
+                        <track kind="captions" src="https://gist.githubusercontent.com/VectoDE/placeholder.vtt" srclang="en" label="English" default>
+                        Ihr Browser unterstützt das Video-Element nicht.
+                    </video>
+                    <figcaption>Video mit Untertiteln</figcaption>
+                </figure>
+
+                <figure>
+                    <canvas id="demoCanvas" width="320" height="160" role="img" aria-label="Canvas Diagramm"></canvas>
+                    <figcaption>Canvas-Zeichnung per Script</figcaption>
+                </figure>
+
+                <figure>
+                    <embed src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='160'%3E%3Ccircle cx='160' cy='80' r='60' fill='%23ffcc00'/%3E%3Ctext x='160' y='90' font-size='32' text-anchor='middle' font-family='Segoe UI, sans-serif'%3EEmbed%3C/text%3E%3C/svg%3E" type="image/svg+xml" width="320" height="160">
+                    <figcaption>Embed eines SVG</figcaption>
+                </figure>
+
+                <figure>
+                    <object data="data:text/html,%3C!DOCTYPE html%3E%3Chtml lang='de'%3E%3Chead%3E%3Cmeta charset='UTF-8'%3E%3Ctitle%3EObjekt%3C/title%3E%3Cstyle%3Ebody%7Bfont-family:Segoe%20UI,sans-serif;padding:1rem%3Bbackground:%23eef2ff%3B%7Dh1%7Bcolor:%231f4b99%3B%7D%3C/style%3E%3C/head%3E%3Cbody%3E%3Ch1%3EObject Beispiel%3C/h1%3E%3Cp%3EDieses HTML wird in einem %26lt%3Bobject%26gt%3B-Tag dargestellt.%3C/p%3E%3C/body%3E%3C/html%3E" type="text/html" width="320" height="200">
+                        <p>Ihr Browser unterstützt das Einbetten nicht. <a href="https://example.com">Externer Link</a></p>
+                    </object>
+                    <figcaption>Object mit HTML-Inhalt</figcaption>
+                </figure>
+
+                <figure>
+                    <iframe src="https://developer.mozilla.org" title="MDN Web Docs" loading="lazy" width="320" height="200"></iframe>
+                    <figcaption>Iframe-Einbindung</figcaption>
+                </figure>
+            </div>
         </section>
 
-        <section>
-            <h2>Interactive Elements</h2>
-            <details>
-                <summary>More Information</summary>
-                <p>This is where you can write the extra details.</p>
-            </details>
-            <dialog open>
-                <p>This is a dialog box.</p>
-                <button>Close</button>
-            </dialog>
+        <section id="interaktiv" aria-labelledby="interaktiv-heading">
+            <h2 id="interaktiv-heading">Interaktive Elemente</h2>
+            <div class="grid">
+                <article class="card">
+                    <h3>Details &amp; Summary</h3>
+                    <details open>
+                        <summary>Projekt-FAQ</summary>
+                        <p>Hier können häufig gestellte Fragen beantwortet werden.</p>
+                    </details>
+                </article>
+                <article class="card">
+                    <h3>Dialog</h3>
+                    <dialog id="feedbackDialog" aria-labelledby="dialog-title">
+                        <form method="dialog">
+                            <h4 id="dialog-title">Feedback senden</h4>
+                            <p>Vielen Dank für Ihre Rückmeldung.</p>
+                            <label for="dialog-feedback">Ihre Nachricht</label>
+                            <textarea id="dialog-feedback" rows="3"></textarea>
+                            <menu class="dialog-menu">
+                                <button value="cancel">Abbrechen</button>
+                                <button value="confirm">Senden</button>
+                            </menu>
+                        </form>
+                    </dialog>
+                    <p>
+                        <button type="button" data-open-dialog="#feedbackDialog">Dialog öffnen</button>
+                    </p>
+                </article>
+                <article class="card">
+                    <h3>Template &amp; Custom Element</h3>
+                    <template id="callout-template">
+                        <section class="callout" role="note">
+                            <h4 part="title">Hinweis</h4>
+                            <p part="content"><slot>Standardinhalt</slot></p>
+                        </section>
+                    </template>
+                    <custom-callout>Dies ist ein Custom Element mit Shadow DOM.</custom-callout>
+                </article>
+                <article class="card">
+                    <h3>Fortschrittsanzeigen</h3>
+                    <p>Speicherauslastung: <meter min="0" max="100" value="64" optimum="40">64%</meter></p>
+                    <p>Upload-Fortschritt: <progress max="100" value="28">28%</progress></p>
+                </article>
+            </div>
         </section>
 
-        <section>
-            <h2>Progress and Meter</h2>
-            <label for="file">HTML 5</label>
-            <progress id="file" max="100" value="95"></progress>
-            <br>
-            <label for="meter">Disk Usage</label>
-            <meter id="meter" value="0.6">60%</meter>
+        <section id="daten" aria-labelledby="daten-heading">
+            <h2 id="daten-heading">Daten, Semantik &amp; Strukturierte Inhalte</h2>
+            <article class="card" itemscope itemtype="https://schema.org/Person">
+                <h3 itemprop="name">Kontaktperson</h3>
+                <p><strong>Rolle:</strong> <span itemprop="jobTitle">Lead Developer</span></p>
+                <p><strong>E-Mail:</strong> <a href="mailto:enterprise@example.com" itemprop="email">enterprise@example.com</a></p>
+                <p><strong>Telefon:</strong> <a href="tel:+49301234567" itemprop="telephone">+49 30 123 4567</a></p>
+                <address itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
+                    <span itemprop="streetAddress">Innovation Way 1</span>,
+                    <span itemprop="postalCode">10115</span>
+                    <span itemprop="addressLocality">Berlin</span>,
+                    <span itemprop="addressCountry">Deutschland</span>
+                </address>
+            </article>
+            <article class="card">
+                <h3>Mathematische Darstellung</h3>
+                <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                    <mrow>
+                        <mi>a</mi>
+                        <mo>=</mo>
+                        <mfrac>
+                            <mrow>
+                                <mi>&Delta;v</mi>
+                            </mrow>
+                            <mrow>
+                                <mi>&Delta;t</mi>
+                            </mrow>
+                        </mfrac>
+                    </mrow>
+                </math>
+            </article>
+            <article class="card">
+                <h3>Definitionen &amp; Daten</h3>
+                <p>Das Element <code>&lt;data&gt;</code> verknüpft maschinenlesbare Werte.</p>
+                <p>Preis: <data value="1299.00">1.299,00 €</data></p>
+                <p>Letzte Aktualisierung: <time datetime="2024-05-15T10:00">15.05.2024 10:00 Uhr</time></p>
+            </article>
         </section>
 
-        <section>
-            <h2>Embedded Content</h2>
-            <iframe src="https://www.example.com" width="300" height="200" title="Example"></iframe>
-            <embed src="example.svg" type="image/svg+xml" width="300" height="200">
+        <section id="layout" aria-labelledby="layout-heading">
+            <h2 id="layout-heading">Layout &amp; Komponenten</h2>
+            <div class="cards">
+                <article class="card">
+                    <h3>Card-Komponente</h3>
+                    <p>Verwendet Flexbox/Grid, Schatten und responsives Verhalten.</p>
+                </article>
+                <article class="card">
+                    <h3>Hinweisbox</h3>
+                    <aside role="note" class="notice">Dies ist ein wichtiger Hinweis für Benutzer.</aside>
+                </article>
+                <article class="card">
+                    <h3>Zahlen-Highlight</h3>
+                    <p><span class="stat" data-value="42">42</span> abgeschlossene Projekte.</p>
+                </article>
+                <article class="card">
+                    <h3>Internationalisierung</h3>
+                    <p lang="en">This paragraph demonstrates language switching.</p>
+                    <p lang="fr">Ce paragraphe montre l'internationalisation.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="call-to-action" aria-labelledby="cta-heading">
+            <h2 id="cta-heading">Bereit für den nächsten Schritt?</h2>
+            <p>Nutzen Sie dieses Template als Grundlage für Ihre Enterprise-Applikation.</p>
+            <p><a class="button" href="mailto:enterprise@example.com">Kontakt aufnehmen</a></p>
         </section>
     </main>
 
-    <footer>
-        <p>Copyright &copy; Vecto. All Rights Reserved.</p>
-        <p>This site is just a test page.</p>
+    <footer class="site-footer" role="contentinfo">
         <address>
-            <p>Contact us at <a href="mailto:example@example.com">example@example.com</a>.</p>
+            <strong>Enterprise HTML Template</strong><br>
+            Innovation Way 1<br>
+            10115 Berlin<br>
+            <a href="mailto:enterprise@example.com">enterprise@example.com</a><br>
+            <a href="tel:+49301234567">+49 30 123 4567</a>
         </address>
+        <p>&copy; <time datetime="2024">2024</time> Vecto. Alle Rechte vorbehalten.</p>
+        <nav aria-label="Fußnavigation" class="footer-nav">
+            <a href="#top">Nach oben</a>
+            <a href="https://github.com/VectoDE/HTML-Template" target="_blank" rel="noopener">GitHub</a>
+            <a href="LICENSE">Lizenz</a>
+            <a href="README.md">Dokumentation</a>
+        </nav>
     </footer>
+
+    <script>
+        const canvas = document.getElementById('demoCanvas');
+        if (canvas?.getContext) {
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 320, 160);
+            gradient.addColorStop(0, '#1f4b99');
+            gradient.addColorStop(1, '#4f83ff');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(255,255,255,0.85)';
+            ctx.font = '24px "Segoe UI", sans-serif';
+            ctx.fillText('Canvas Demo', 80, 80);
+        }
+
+        document.querySelectorAll('[data-open-dialog]').forEach((trigger) => {
+            const selector = trigger.getAttribute('data-open-dialog');
+            const dialog = document.querySelector(selector);
+            if (!dialog) return;
+            trigger.addEventListener('click', () => dialog.showModal());
+            dialog.addEventListener('close', () => console.log('Dialog geschlossen:', dialog.returnValue));
+        });
+    </script>
+    <script type="module">
+        class CustomCallout extends HTMLElement {
+            constructor() {
+                super();
+                const template = document.getElementById('callout-template');
+                const content = template.content.cloneNode(true);
+                const shadow = this.attachShadow({ mode: 'open' });
+                shadow.appendChild(content);
+                const style = document.createElement('style');
+                style.textContent = `
+                    :host { display: block; margin-top: 1rem; }
+                    ::part(title) { font-size: 1.1rem; margin-bottom: 0.5rem; }
+                    ::part(content) { line-height: 1.5; }
+                    section { border-left: 4px solid #1f4b99; padding: 1rem; background: var(--surface-alt); border-radius: 0.75rem; }
+                `;
+                shadow.prepend(style);
+            }
+        }
+        customElements.define('custom-callout', CustomCallout);
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Enterprise HTML Template",
+            "url": "https://github.com/VectoDE/HTML-Template",
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "customer support",
+                "email": "enterprise@example.com"
+            }
+        }
+    </script>
 </body>
 </html>
-
-<!-- eof -->
-
-<!--
-    Developer: Vecto. (Tim Hauke)
-    Copyright: Is by the Developer but everyone can use it as Template.
-    License: https://github.com/VectoDE/HTML-Template/blob/main/LICENSE
-    Repository: https://github.com/VectoDE/HTML-Template
--->
