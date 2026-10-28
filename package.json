@@ -21,9 +21,13 @@
     "format:check": "prettier --check .",
     "policy": "node scripts/policy/run.mjs",
     "test": "node --test \"tests/unit/**/*.test.mjs\"",
-    "lint": "npm run format:check && npm run policy"
+    "lint": "npm run format:check && npm run lint:js && npm run policy",
+    "lint:js": "eslint . --max-warnings=0",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 \"tests/unit/**/*.test.mjs\""
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint": "10.13.0",
     "prettier": "3.9.10"
   }
 }
