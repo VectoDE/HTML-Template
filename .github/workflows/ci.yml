@@ -42,7 +42,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npm test
+      - run: npm run test:coverage
 
   actionlint:
     runs-on: ubuntu-latest
