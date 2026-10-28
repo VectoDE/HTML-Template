@@ -20,7 +20,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "policy": "node scripts/policy/run.mjs",
-    "test": "node --test tests/unit/",
+    "test": "node --test \"tests/unit/**/*.test.mjs\"",
     "lint": "npm run format:check && npm run policy"
   },
   "devDependencies": {

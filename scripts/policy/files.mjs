@@ -1,0 +1,61 @@
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+
+// The only files allowed to contain the attribution patterns.
+const ATTRIBUTION_EXCLUDED = [
+  'scripts/policy/attribution.mjs',
+  'tests/unit/policy-attribution.test.mjs',
+];
+
+export function isAttributionExcluded(path) {
+  return ATTRIBUTION_EXCLUDED.includes(path);
+}
+
+export function filterAttributionTargets(paths) {
+  return paths.filter((p) => !isAttributionExcluded(p));
+}
+
+export function findCrlf(text) {
+  const lines = [];
+  text.split('\n').forEach((line, index, all) => {
+    if (index < all.length - 1 && line.endsWith('\r')) lines.push(index + 1);
+  });
+  return lines;
+}
+
+function globToRegex(glob) {
+  const escaped = glob
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*\*/g, '\u0000')
+    .replace(/\*/g, '[^/]*')
+    .replace(/\?/g, '[^/]')
+    .replace(/\u0000/g, '.*');
+  return new RegExp(`^${escaped}$`);
+}
+
+export function isBinaryPath(path, gitattributes) {
+  for (const raw of gitattributes.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+    const [pattern, ...attrs] = line.split(/\s+/);
+    if (!attrs.includes('binary')) continue;
+    const anchored = pattern.replace(/^\//, '');
+    const target = pattern.includes('/') ? path : path.split('/').pop();
+    if (globToRegex(anchored).test(target)) return true;
+  }
+  return false;
+}
+
+export function listTrackedTextFiles() {
+  const out = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' });
+  let attrs = '';
+  try {
+    attrs = readFileSync('.gitattributes', 'utf8');
+  } catch {
+    // no .gitattributes: nothing is binary
+  }
+  return out
+    .split('\0')
+    .filter(Boolean)
+    .filter((p) => !isBinaryPath(p, attrs));
+}
