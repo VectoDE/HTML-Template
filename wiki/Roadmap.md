@@ -12,7 +12,13 @@ The rebuild runs in seven stages. Each stage ends with a signed pre-release. Onc
 
 ## After 1.0.0
 
-Versions follow conventional commits, as described in [[Release process]]. New platform features are added as browsers ship them.
+Stages 2 to 7 are the plan up to `1.0.0`. After that, the work is maintenance. No dates are promised.
+
+- Refresh the browser support data from MDN browser-compat-data and web-features on a schedule.
+- Add a feature page or table entry when a feature reaches Baseline in web-features.
+- Fix reported bugs and accessibility barriers.
+
+Versions follow conventional commits, as described in [[Release process]]: `feat` bumps the minor version, `fix` the patch version, and a breaking change the major version.
 
 ## Where to follow the work
 

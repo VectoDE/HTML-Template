@@ -10,7 +10,7 @@ Decisions that affect scope, design or process are posted in the "Decisions" cat
 
 ## Becoming a maintainer
 
-Anyone who has made several accepted contributions over time and has shown good judgement in reviews can be invited by the maintainer. The invitation comes with write access. Access to releases and settings is added later, one step at a time.
+Anyone who has made several accepted contributions over time and has shown good judgement in reviews can be invited by the maintainer. The invitation comes with write access. Release and settings access would be granted step by step. No such process is set up yet.
 
 ## If the maintainer is unavailable
 
