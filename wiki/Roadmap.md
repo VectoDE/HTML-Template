@@ -1,4 +1,4 @@
-The rebuild runs in seven stages. The site is live during the stages, and every stage ends with a signed pre-release. Stage 1 is in progress. The rest is planned, and the boundaries can still move.
+The rebuild runs in seven stages. Each stage ends with a signed pre-release. Once the deployment pipeline exists (stage 4), the site is deployed after every stage. Stage 1 is in progress. The rest is planned, and the boundaries can still move.
 
 | Stage | Content                                                                                                                                                             | Release         |
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |

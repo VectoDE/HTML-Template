@@ -4,6 +4,7 @@
 # The wiki is edited in wiki/ and reviewed with the code. This script copies
 # the committed pages to https://github.com/VectoDE/HTML-Template.wiki.git,
 # removes pages that no longer exist here, and pushes the result.
+# Edits made directly in the GitHub wiki are overwritten.
 set -euo pipefail
 
 WIKI_URL="https://github.com/VectoDE/HTML-Template.wiki.git"
@@ -21,11 +22,26 @@ if [[ -n "$(git status --porcelain -- wiki)" ]]; then
   exit 1
 fi
 
+if [[ -z "$(git config user.name)" || -z "$(git config user.email)" ]]; then
+  echo "Set git user.name and user.email before syncing." >&2
+  exit 1
+fi
+
+shopt -s nullglob
+pages=(wiki/*.md)
+if [[ ${#pages[@]} -eq 0 ]]; then
+  echo "wiki/ contains no .md pages." >&2
+  exit 1
+fi
+
 source_commit="$(git rev-parse --short HEAD)"
 workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir"' EXIT
 
-git clone --quiet "$WIKI_URL" "$workdir/wiki"
+if ! git clone --quiet "$WIKI_URL" "$workdir/wiki"; then
+  echo "Cannot clone the wiki. Create the first page once in the GitHub UI, and make sure the wiki is enabled." >&2
+  exit 1
+fi
 
 # Remove pages that were deleted from wiki/.
 for existing in "$workdir"/wiki/*.md; do
@@ -35,7 +51,7 @@ for existing in "$workdir"/wiki/*.md; do
   fi
 done
 
-cp -- wiki/*.md "$workdir/wiki/"
+cp -- "${pages[@]}" "$workdir/wiki/"
 
 cd "$workdir/wiki"
 git add --all

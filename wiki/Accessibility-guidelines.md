@@ -26,4 +26,4 @@ The editing surface keeps native undo, selection, IME input and screen-reader ed
 
 axe-core runs inside Playwright against every page of the shell. Lighthouse CI covers the home page and a sample of topic pages. Keyboard paths and screen-reader behaviour are checked by hand before a release, because automated tools find only part of the problems. Details of the tools are in the [[Testing guide]].
 
-If you find a barrier, open an issue. Treat it as a bug, not as a wish.
+If you find a barrier, open an issue. It will be handled as a bug.

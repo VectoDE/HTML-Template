@@ -32,7 +32,8 @@ function stripCode(text) {
 
 function toPageName(target) {
   const withoutAnchor = target.split('#')[0].trim();
-  return withoutAnchor.replaceAll(' ', '-');
+  const name = withoutAnchor.replaceAll(' ', '-');
+  return name.endsWith('.md') ? name.slice(0, -3) : name;
 }
 
 function isInternal(target) {

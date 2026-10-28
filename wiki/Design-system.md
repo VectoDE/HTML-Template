@@ -1,4 +1,4 @@
-The visual design is set and will be built in stage 3. This page holds the tokens and rules so that the implementation and reviews share one source. Nothing on this page is shipped yet.
+The visual design is set and will be built in stage 3, so nothing on this page is shipped yet. It holds the tokens and rules so that the implementation and reviews share one source.
 
 ## Layout
 
@@ -38,6 +38,6 @@ Only the palette opening and closing and the feedback while a panel is resized m
 
 ## What to avoid
 
-Uniform grids of rounded cards, gradient blobs, glass effects and emoji used as icons. The design should look like a tool for developers, not like a template.
+Uniform grids of rounded cards, gradient blobs, glass effects and emoji used as icons. The aim is a tool that looks made for developers.
 
 See [[Accessibility guidelines]] for the contrast and keyboard bars the design has to meet.

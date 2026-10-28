@@ -17,7 +17,7 @@ Each demo declares a feature-detect expression. The readout bar evaluates it in 
 
 ## Keeping it current
 
-A weekly automated update raises both packages, rebuilds the data and opens a pull request when the output changed. Dependabot or a scheduled workflow does this. A change in the data shows up as a diff in the generated files, so a reviewer can see which claims moved.
+A weekly automated update raises both packages, rebuilds the data and opens a pull request when the output changed. A scheduled workflow does this, or Dependabot; the choice is made in stage 2. A change in the data shows up as a diff in the generated files, so a reviewer can see which claims moved.
 
 ## Wrong data
 

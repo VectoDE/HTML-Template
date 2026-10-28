@@ -47,7 +47,7 @@ slsa-verifier verify-artifact html-template-<v>.tar.gz \
   --source-tag v<v>
 ```
 
-Both commands print a success message and exit with 0. Anything else means the file is not what the workflow produced.
+Both commands print a success message and exit with 0. Any other result means verification failed. Do not use the file until you know why.
 
 ## How a maintainer cuts a release
 

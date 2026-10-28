@@ -57,3 +57,8 @@ test('keys with a .md suffix are accepted', () => {
   const result = checkWikiLinks(pages({ 'Home.md': '[[FAQ]]', 'FAQ.md': '' }));
   assert.deepEqual(result, []);
 });
+
+test('Markdown link with a .md suffix resolves the page', () => {
+  const result = checkWikiLinks(pages({ Home: '[y](FAQ.md)', FAQ: '' }));
+  assert.deepEqual(result, []);
+});

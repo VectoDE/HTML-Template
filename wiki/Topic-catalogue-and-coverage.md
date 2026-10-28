@@ -24,8 +24,6 @@ There are two levels:
 
 A key that is neither covered nor excluded fails the build. An exclusion has a written reason, such as "removed from all browsers", "non-standard alias of another key" or "internal to another feature". The maintainer keeps the list and reviews it before each release. Deprecated and removed features are not taught, but they are listed in a deprecated appendix per category with the replacement, and they count toward completeness.
 
-## Which `http` and `webassembly` keys count
-
-This rule is set when the coverage check is built in stage 2 and written down here at that point.
+Which `http` and `webassembly` keys count is decided when the coverage check is built in stage 2, and the rule is written down here at that point.
 
 See [[Browser support data]] for where the data comes from and [[Writing a demo]] for how a demo declares its keys.
