@@ -1,13 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-// Check runs that must have succeeded on the head commit of main.
-export const REQUIRED_CHECKS = [
-  'lint',
-  'test',
-  'actionlint',
-  'analyze (javascript-typescript)',
-  'analyze (actions)',
+// Workflows that must have succeeded on a push to main for the head commit.
+// They are matched by file path, so a run of another workflow with the same
+// name or the same job names does not count.
+export const REQUIRED_WORKFLOWS = [
+  '.github/workflows/ci.yml',
+  '.github/workflows/codeql.yml',
 ];
 
 const CHANNELS = new Set(['alpha', 'beta', 'final']);
@@ -28,30 +27,38 @@ export function channelFor(config, number) {
   return channel;
 }
 
-// Only check runs created by GitHub Actions count. Any other app could post
-// a check run with the same name.
-const TRUSTED_APP = 'github-actions';
+function newer(a, b) {
+  const at = String(a.created_at);
+  const bt = String(b.created_at);
+  if (at !== bt) return at > bt;
+  return Number(a.id) > Number(b.id);
+}
 
-// Required checks whose latest GitHub Actions run on `sha` did not succeed.
-// Takes the pages of `gh api --paginate --slurp .../commits/<sha>/check-runs`.
-export function missingChecks(pages, sha) {
+// Required workflows whose newest push run on main for `sha` is not a
+// completed success. Takes the pages of
+// `gh api --paginate --slurp .../actions/runs?head_sha=<sha>&branch=main&event=push`.
+export function failingWorkflows(pages, sha) {
   if (typeof sha !== 'string' || sha === '') {
-    throw new Error('missingChecks needs the head sha of main');
+    throw new Error('failingWorkflows needs the head sha of main');
   }
   const list = Array.isArray(pages) ? pages : [];
   const runs = list
-    .flatMap((page) => page?.check_runs ?? [])
-    .filter((run) => run?.app?.slug === TRUSTED_APP && run.head_sha === sha);
-  const latest = new Map();
+    .flatMap((page) => page?.workflow_runs ?? [])
+    .filter(
+      (run) =>
+        run?.head_sha === sha &&
+        run.head_branch === 'main' &&
+        run.event === 'push',
+    );
+  const newest = new Map();
   for (const run of runs) {
-    const seen = latest.get(run.name);
-    if (!seen || String(run.started_at) > String(seen.started_at)) {
-      latest.set(run.name, run);
-    }
+    const seen = newest.get(run.path);
+    if (!seen || newer(run, seen)) newest.set(run.path, run);
   }
-  return REQUIRED_CHECKS.filter(
-    (name) => latest.get(name)?.conclusion !== 'success',
-  );
+  return REQUIRED_WORKFLOWS.filter((path) => {
+    const run = newest.get(path);
+    return run?.status !== 'completed' || run.conclusion !== 'success';
+  });
 }
 
 function readJson(path) {
@@ -60,19 +67,19 @@ function readJson(path) {
 
 // CLI for tag.yml:
 //   guards.mjs channel <config> <issue>  prints the channel or nothing
-//   guards.mjs checks <check-runs.json> <sha>  prints the failing checks
+//   guards.mjs runs <runs.json> <sha>    prints the failing workflows
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     const [command, ...args] = process.argv.slice(2);
     if (command === 'channel') {
       const channel = channelFor(readJson(args[0]), args[1]);
       if (channel !== null) process.stdout.write(`${channel}\n`);
-    } else if (command === 'checks') {
-      const missing = missingChecks(readJson(args[0]), args[1]);
-      if (missing.length > 0) process.stdout.write(`${missing.join(', ')}\n`);
+    } else if (command === 'runs') {
+      const failing = failingWorkflows(readJson(args[0]), args[1]);
+      if (failing.length > 0) process.stdout.write(`${failing.join(', ')}\n`);
     } else {
       throw new Error(
-        'usage: guards.mjs channel <config> <issue> | checks <file> <sha>',
+        'usage: guards.mjs channel <config> <issue> | runs <file> <sha>',
       );
     }
   } catch (error) {

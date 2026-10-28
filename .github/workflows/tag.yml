@@ -20,7 +20,6 @@ jobs:
       contents: write
       actions: write
       issues: write
-      checks: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -62,11 +61,12 @@ jobs:
             *) skip "$SENDER closed the issue without the admin or maintain role" ;;
           esac
           sha="$(gh api "repos/$REPO/commits/main" --jq .sha)"
-          gh api --paginate --slurp "repos/$REPO/commits/$sha/check-runs?per_page=100" \
-            > "$RUNNER_TEMP/check-runs.json"
-          failing="$(node scripts/release/guards.mjs checks "$RUNNER_TEMP/check-runs.json" "$sha")"
+          gh api --paginate --slurp \
+            "repos/$REPO/actions/runs?head_sha=$sha&branch=main&event=push&per_page=100" \
+            > "$RUNNER_TEMP/runs.json"
+          failing="$(node scripts/release/guards.mjs runs "$RUNNER_TEMP/runs.json" "$sha")"
           if [ -n "$failing" ]; then
-            skip "required checks on main $sha did not succeed: $failing"
+            skip "required workflows on main $sha did not succeed: $failing"
           fi
           node scripts/release/next.mjs "$channel" > "$RUNNER_TEMP/next.txt"
           tag="$(sed -n 's/^tag=//p' "$RUNNER_TEMP/next.txt")"

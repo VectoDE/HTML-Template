@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import {
-  REQUIRED_CHECKS,
+  REQUIRED_WORKFLOWS,
   channelFor,
-  missingChecks,
+  failingWorkflows,
 } from '../../scripts/release/guards.mjs';
 import { checkWorkflow } from '../../scripts/policy/workflows.mjs';
 
@@ -13,19 +13,23 @@ const stages = JSON.parse(
 );
 
 const HEAD = 'c0ffee0000000000000000000000000000000000';
+const CI = '.github/workflows/ci.yml';
+const CODEQL = '.github/workflows/codeql.yml';
 
-const run = (
-  name,
+let nextId = 1;
+const wfRun = (path, conclusion, overrides = {}) => ({
+  id: nextId++,
+  name: path.slice(path.lastIndexOf('/') + 1, -4),
+  path,
+  head_sha: HEAD,
+  head_branch: 'main',
+  event: 'push',
+  status: conclusion === null ? 'in_progress' : 'completed',
   conclusion,
-  startedAt = '2026-10-28T10:00:00Z',
-  { app = 'github-actions', sha = HEAD } = {},
-) => ({
-  name,
-  conclusion,
-  started_at: startedAt,
-  head_sha: sha,
-  app: { slug: app },
+  created_at: '2026-10-28T10:00:00Z',
+  ...overrides,
 });
+const page = (...runs) => [{ total_count: runs.length, workflow_runs: runs }];
 
 test('release-stages.json maps the stage issues to their channels', () => {
   for (const n of [2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14]) {
@@ -50,85 +54,76 @@ test('channelFor rejects an unknown channel in the config', () => {
   assert.throws(() => channelFor({ issues: { 3: 'rc' } }, 3), /channel/);
 });
 
-test('missingChecks is empty when every required check succeeded', () => {
+test('REQUIRED_WORKFLOWS names ci.yml and codeql.yml', () => {
+  assert.deepEqual(REQUIRED_WORKFLOWS, [CI, CODEQL]);
+});
+
+test('failingWorkflows passes when ci and codeql succeeded on main', () => {
   const pages = [
-    { check_runs: REQUIRED_CHECKS.slice(0, 2).map((n) => run(n, 'success')) },
-    { check_runs: REQUIRED_CHECKS.slice(2).map((n) => run(n, 'success')) },
+    ...page(wfRun(CI, 'success')),
+    ...page(wfRun(CODEQL, 'success')),
   ];
-  assert.deepEqual(missingChecks(pages, HEAD), []);
+  assert.deepEqual(failingWorkflows(pages, HEAD), []);
 });
 
-test('missingChecks names absent and failed checks', () => {
-  const pages = [
-    {
-      check_runs: [
-        run('lint', 'success'),
-        run('test', 'failure'),
-        run('actionlint', null),
-        run('analyze (actions)', 'success'),
-      ],
-    },
-  ];
-  assert.deepEqual(missingChecks(pages, HEAD), [
-    'test',
-    'actionlint',
-    'analyze (javascript-typescript)',
-  ]);
+test('failingWorkflows reports a failing CI run', () => {
+  const pages = page(wfRun(CI, 'failure'), wfRun(CODEQL, 'success'));
+  assert.deepEqual(failingWorkflows(pages, HEAD), [CI]);
 });
 
-test('missingChecks uses the latest run of a check', () => {
-  const others = REQUIRED_CHECKS.slice(1).map((n) => run(n, 'success'));
-  const failedThenFixed = [
-    run('lint', 'failure', '2026-10-28T09:00:00Z'),
-    run('lint', 'success', '2026-10-28T09:30:00Z'),
-  ];
-  assert.deepEqual(
-    missingChecks([{ check_runs: [...failedThenFixed, ...others] }], HEAD),
-    [],
-  );
-  const fixedThenFailed = [
-    run('lint', 'success', '2026-10-28T09:00:00Z'),
-    run('lint', 'failure', '2026-10-28T09:30:00Z'),
-  ];
-  assert.deepEqual(
-    missingChecks([{ check_runs: [...fixedThenFailed, ...others] }], HEAD),
-    ['lint'],
-  );
+test('failingWorkflows reports a run that has not finished', () => {
+  const pages = page(wfRun(CI, null), wfRun(CODEQL, 'success'));
+  assert.deepEqual(failingWorkflows(pages, HEAD), [CI]);
 });
 
-test('missingChecks treats unreadable input as nothing passed', () => {
-  assert.deepEqual(missingChecks(null, HEAD), REQUIRED_CHECKS);
-  assert.deepEqual(missingChecks({ check_runs: [] }, HEAD), REQUIRED_CHECKS);
+test('failingWorkflows ignores a success from another workflow path', () => {
+  // Same name and job names as ci.yml, but defined in a different file.
+  const copy = wfRun('.github/workflows/ci-copy.yml', 'success', {
+    name: 'ci',
+  });
+  const pages = page(copy, wfRun(CODEQL, 'success'));
+  assert.deepEqual(failingWorkflows(pages, HEAD), [CI]);
 });
 
-test('missingChecks ignores same-named runs from another app', () => {
-  const spoofed = REQUIRED_CHECKS.map((n) =>
-    run(n, 'success', '2026-10-28T11:00:00Z', { app: 'evil-app' }),
+test('failingWorkflows ignores a push run on another branch', () => {
+  const pages = page(
+    wfRun(CI, 'success', { head_branch: 'feature' }),
+    wfRun(CODEQL, 'success'),
   );
-  assert.deepEqual(
-    missingChecks([{ check_runs: spoofed }], HEAD),
-    REQUIRED_CHECKS,
-  );
-  const real = REQUIRED_CHECKS.map((n) => run(n, 'failure'));
-  assert.deepEqual(
-    missingChecks([{ check_runs: [...real, ...spoofed] }], HEAD),
-    REQUIRED_CHECKS,
-  );
+  assert.deepEqual(failingWorkflows(pages, HEAD), [CI]);
 });
 
-test('missingChecks ignores runs for another commit', () => {
-  const other = REQUIRED_CHECKS.map((n) =>
-    run(n, 'success', undefined, { sha: 'f'.repeat(40) }),
+test('failingWorkflows ignores other events and other commits', () => {
+  const pages = page(
+    wfRun(CI, 'success', { event: 'pull_request' }),
+    wfRun(CODEQL, 'success', { head_sha: 'f'.repeat(40) }),
   );
-  assert.deepEqual(
-    missingChecks([{ check_runs: other }], HEAD),
-    REQUIRED_CHECKS,
-  );
+  assert.deepEqual(failingWorkflows(pages, HEAD), [CI, CODEQL]);
 });
 
-test('missingChecks needs the head commit', () => {
-  const pages = [{ check_runs: REQUIRED_CHECKS.map((n) => run(n, 'success')) }];
-  assert.throws(() => missingChecks(pages), /sha/);
+test('failingWorkflows uses the newest run of each workflow', () => {
+  const failedThenFixed = page(
+    wfRun(CI, 'failure', { created_at: '2026-10-28T09:00:00Z' }),
+    wfRun(CI, 'success', { created_at: '2026-10-28T09:30:00Z' }),
+    wfRun(CODEQL, 'success'),
+  );
+  assert.deepEqual(failingWorkflows(failedThenFixed, HEAD), []);
+  const fixedThenFailed = page(
+    wfRun(CI, 'failure', { created_at: '2026-10-28T09:30:00Z' }),
+    wfRun(CI, 'success', { created_at: '2026-10-28T09:00:00Z' }),
+    wfRun(CODEQL, 'success'),
+  );
+  assert.deepEqual(failingWorkflows(fixedThenFailed, HEAD), [CI]);
+});
+
+test('failingWorkflows treats unreadable input as nothing passed', () => {
+  assert.deepEqual(failingWorkflows(null, HEAD), REQUIRED_WORKFLOWS);
+  assert.deepEqual(failingWorkflows({}, HEAD), REQUIRED_WORKFLOWS);
+});
+
+test('failingWorkflows needs the head commit', () => {
+  const pages = page(wfRun(CI, 'success'), wfRun(CODEQL, 'success'));
+  assert.throws(() => failingWorkflows(pages), /sha/);
 });
 
 test('release.yml lets only the owner or the tag workflow release', () => {
@@ -143,9 +138,14 @@ test('release.yml lets only the owner or the tag workflow release', () => {
     'guard runs first',
   );
   assert.match(text, /ACTOR: \$\{\{ github\.actor \}\}/);
+  assert.match(text, /TRIGGERING_ACTOR: \$\{\{ github\.triggering_actor \}\}/);
   assert.match(text, /OWNER: \$\{\{ github\.repository_owner \}\}/);
-  assert.match(text, /"\$ACTOR" != "github-actions\[bot\]"/);
+  assert.match(text, /EVENT: \$\{\{ github\.event_name \}\}/);
   assert.match(text, /if: startsWith\(github\.ref, 'refs\/tags\/v'\)/);
+  assert.match(
+    text,
+    /git merge-base --is-ancestor "\$GITHUB_SHA" origin\/main/,
+  );
 });
 
 test('tag.yml and release.yml pass the workflow policy', () => {
@@ -202,6 +202,5 @@ test('tag.yml grants only the job permissions it needs', () => {
     'contents: write',
     'actions: write',
     'issues: write',
-    'checks: read',
   ]);
 });
