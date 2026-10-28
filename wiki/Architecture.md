@@ -59,11 +59,11 @@ What ends up in `dist/site`, and which stage uses it:
 | `data/nav.json`                      | Categories and topics in order                       | Stage 3 navigation     |
 | `data/search-index.json`             | Topics, demos and features with search terms         | Stage 3 search         |
 | `precache.json`                      | A version hash and the URL of every file             | Stage 4 service worker |
-| `sitemap.xml`, `robots.txt`          | Absolute URLs for crawlers                           | Search engines         |
+| `sitemap.xml`, `robots.txt`          | Absolute sitemap URLs and a crawl rule               | Search engines         |
 
 The compat files are described in [[Browser support data]]. The stage 2 pages are plain semantic HTML with no CSS and no script. Each page carries the shell's Content-Security-Policy in a `meta` tag. The code that hashes inline scripts and styles exists already, and stage 3 uses it once pages carry any.
 
-Every URL in the output starts with the site base `/HTML-Template/`, because the shell lives at `https://vectode.github.io/HTML-Template/`. The file `robots.txt` is written to the site root, which is served at `/HTML-Template/robots.txt`. Crawlers read it only at the root of a host, so on a GitHub Pages project site the file has no effect. The sitemap has to be submitted another way, for example in Search Console.
+Every site URL the build generates (navigation, search index, topic data, precache list, canonical links and the sitemap) starts with the site base `/HTML-Template/`, because the shell lives at `https://vectode.github.io/HTML-Template/`. The `Allow: /` line in `robots.txt` is a path rule, not a URL. The file is written to the site root, which is served at `/HTML-Template/robots.txt`. Crawlers read it only at the root of a host, so on a GitHub Pages project site the file has no effect. The sitemap has to be submitted another way, for example in Search Console.
 
 `npm run build` does not run the completeness check. That is its own command, `npm run coverage`, described in [[Topic catalogue and coverage]]. In CI the job `build` runs the build, then the coverage check, and uploads `dist/site` as the artifact `site`.
 

@@ -12,6 +12,6 @@ The project is being rebuilt in seven stages. Stage 1 is the repository, the CI,
 
 ## Status
 
-The repository holds the policy checks, the CI workflows, the OpenSSF configuration, the release pipeline, the build that writes the static site to `dist/site`, and the coverage check. There is no deployed site yet. Stage 3 builds the shell next. The first signed release will be the pre-release `1.0.0-alpha.1`. Version 1.0.0 is published once every topic is done.
+The repository holds the policy checks, the CI workflows, the OpenSSF configuration, the release pipeline, the build that writes the static site to `dist/site`, and the coverage check. There is no deployed site yet. Stage 3 builds the shell next. The first signed pre-release, `1.0.0-alpha.1`, shipped with stage 1. Version 1.0.0 is published once every topic is done.
 
 The source code is licensed under the MIT License. The repository is at https://github.com/VectoDE/HTML-Template.

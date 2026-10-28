@@ -32,7 +32,7 @@ The file starts with a front matter block between two `---` lines, followed by t
 
 Unknown keys are errors. The front matter is a small subset of YAML: `key: value`, lists as `[a, b]` or as lines starting with `- `, and nothing nested. Indent with spaces, not tabs.
 
-The text uses a Markdown subset: paragraphs, `-` and `1.` lists (one level), fenced code blocks, headings from `##` to `####`, inline code, `**strong**`, `*emphasis*` and `[links](https://example.org)`. The page owns the `h1`, so the text starts at `##` and may not skip a level. Raw HTML is an error. Images, tables, quotes and nested lists are not supported, but they are not errors either. The build renders them as plain text or as a flat list. Link targets must start with `https://`, `http://`, `#`, `./` or `../`, and may not contain spaces or parentheses. `javascript:` and `data:` targets are errors.
+The text uses a Markdown subset: paragraphs, `-` and `1.` lists (one level), fenced code blocks, headings from `##` to `####`, inline code, `**strong**`, `*emphasis*` and `[links](https://example.org)`. The page owns the `h1`, so the text starts at `##` and may not skip a level. A line that starts with raw HTML is an error. HTML inside a line is shown as text. Images, tables, quotes and nested lists are not supported, but they are not errors either. The build renders them as plain text or as a flat list. Link targets must start with `https://`, `http://`, `#`, `./` or `../`, and may not contain spaces or parentheses. `javascript:` and `data:` targets are errors.
 
 ## The demo file
 

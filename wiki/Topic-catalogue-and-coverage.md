@@ -60,7 +60,7 @@ npm run coverage -- --strict
 npm run coverage:update
 ```
 
-The first checks and exits with 1 on any problem. The last rewrites `pending.json` and `claims.json` from the current data and the content. In a GitHub Actions run the check also writes a summary table, with the first fifty problems, to the step summary. It also checks that every sub-entry of a covered unit appears in the reference table of its topic.
+The first checks and exits with 1 on any problem. The last rewrites `pending.json` and `claims.json` from the current data and the content. In a GitHub Actions run the check also writes a summary table, with the first fifty problems, to the step summary. The reference table of a topic is generated from the data, so it holds every sub-entry of a covered unit. The check compares the two as a guard against regressions.
 
 `npm run build` does not run the check. The CI job `build` runs both, one after the other.
 
