@@ -8,11 +8,11 @@ The shipped site has no runtime dependencies. The editor, the search and the bui
 
 ## Can I run my own code on the site?
 
-Yes, in the editor. It runs on a separate preview origin and not on the site itself, so it cannot touch the site's stored data. See the [[Security model]].
+Yes, in the editor. Your code runs on a separate preview origin, so it cannot touch the data the site stores. See the [[Security model]].
 
 ## Why does a demo ask me to press a button before it uses my camera?
 
-Demos that need a permission ask only after you click. They never prompt on load. If you deny the request, the demo shows what happens in that case.
+A demo that needs a permission asks for it only after you click its button, never when the page loads. If you deny the request, the demo shows what happens in that case.
 
 ## A demo says my browser does not support a feature. Is that right?
 

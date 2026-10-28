@@ -3,7 +3,8 @@ This page lists what is tested and with which tool. Only the unit tests and the 
 ## Exists now
 
 - Unit tests with the Node test runner, in `tests/unit`. Run them with `npm test`. They cover the policy checks, the release helpers and the wiki link check.
-- Policy checks, run with `npm run policy`. They check the workflow files, line endings, forbidden text in commits and files, DCO sign-off and links between wiki pages.
+- Policy checks, run with `npm run policy`. They check the workflow files, line endings, forbidden text in tracked files and links between wiki pages.
+- The `dco` workflow on pull requests checks the sign-off and forbidden text in every commit message, and forbidden text in the pull request title and body.
 - Formatting with Prettier, run with `npm run format:check`.
 - CodeQL and the OpenSSF Scorecard run in GitHub Actions.
 

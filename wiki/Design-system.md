@@ -38,6 +38,6 @@ Only the palette opening and closing and the feedback while a panel is resized m
 
 ## What to avoid
 
-Uniform grids of rounded cards, gradient blobs, glass effects and emoji used as icons. The aim is a tool that looks made for developers.
+The site should look like a tool made for developers, so it uses no uniform grids of rounded cards, gradient blobs, glass effects or emoji as icons.
 
 See [[Accessibility guidelines]] for the contrast and keyboard bars the design has to meet.

@@ -7,7 +7,7 @@
 
 HTML-Template is becoming an interactive reference for web developers. You look up a feature of HTML, CSS or JavaScript and see it working live. You change the code in the browser, watch the result, and copy it into your own project. Each feature is shown in its modern form, with the parts real projects need: accessibility, error handling and fallbacks.
 
-MDN explains features in depth but scatters the runnable examples. Playgrounds like CodePen run code but say little about it. This project puts the explanation, verified browser support, the live demo, the editor and a copyable result on one page. The site is in English only.
+A topic page holds the explanation of a feature, its verified browser support, live demos with an editor, and code you can copy. The site is in English only.
 
 ## Status
 
@@ -18,7 +18,7 @@ The project is being rebuilt in seven stages. Stage 1 is under way: repository, 
 
 ## Local setup
 
-You need Node.js 24 or newer. The version is pinned in `.nvmrc`.
+You need Node.js 24 (pinned in `.nvmrc`).
 
 ```sh
 npm ci --ignore-scripts
@@ -28,7 +28,7 @@ npm run lint
 
 ## Contributing and security
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before you open a pull request. Commits need a sign-off (`git commit -s`). Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report vulnerabilities as described in [SECURITY.md](SECURITY.md), not in public issues.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before you open a pull request. Commits need a sign-off (`git commit -s`). Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report vulnerabilities privately, as [SECURITY.md](SECURITY.md) describes.
 
 ## License
 

@@ -12,7 +12,7 @@ Security problems do not go into public issues. See [SECURITY.md](SECURITY.md).
 
 ## Setup
 
-You need Node.js 24 or newer. The repository pins the version in `.nvmrc`.
+You need Node.js 24 or newer. The repository pins the version in `.nvmrc`, and `nvm use` picks it up.
 
 ```sh
 nvm use
@@ -20,6 +20,8 @@ npm ci --ignore-scripts
 npm test
 npm run lint
 ```
+
+nvm-windows ignores `.nvmrc`. With it, run `nvm install 24` and then `nvm use 24` instead of `nvm use`.
 
 `npm ci --ignore-scripts` installs exactly what the lockfile says and does not run dependency install scripts. Use it locally as well as in CI.
 
@@ -45,7 +47,7 @@ Every commit needs a `Signed-off-by` line, which certifies the [Developer Certif
 
 ### Attribution
 
-Commits, pull requests, issues and docs must not carry tool attribution trailers or footers. That covers any line that names a code generator or an assistant as author, co-author or origin. The policy check fails the build when it finds one.
+Commits, pull requests, issues and docs must not carry tool attribution trailers or footers, meaning any line that names a code generator or an assistant as author, co-author or origin. `npm run policy` looks for such lines in every tracked file. The `dco` workflow looks for them in the commit messages, the title and the body of each pull request. Issues and comments are reviewed by hand.
 
 ## Pull requests
 

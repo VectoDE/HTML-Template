@@ -2,7 +2,7 @@ This page covers running the repository on your machine. At the moment that mean
 
 ## Requirements
 
-- Node.js 24 or newer. The version is pinned in `.nvmrc`, so `nvm use` picks the right one.
+- Node.js 24 or newer. The version is pinned in `.nvmrc`, so `nvm use` picks the right one. nvm-windows ignores `.nvmrc`; with it, run `nvm install 24` and then `nvm use 24`.
 - Git. Commits must carry a `Signed-off-by` line (`git commit -s`).
 
 ## Set up
@@ -14,17 +14,17 @@ nvm use
 npm ci --ignore-scripts
 ```
 
-`npm ci --ignore-scripts` installs exactly what the lockfile lists and runs no install scripts of dependencies. Use it locally and in CI. Prettier is the only dev dependency right now.
+`npm ci --ignore-scripts` installs exactly what the lockfile lists and skips the install scripts of dependencies. Use it locally and in CI. Prettier is the only dev dependency right now.
 
 ## Commands
 
-| Command                | What it does                                                   |
-| ---------------------- | -------------------------------------------------------------- |
-| `npm test`             | Runs the unit tests in `tests/unit` with the Node test runner. |
-| `npm run format`       | Rewrites files with Prettier.                                  |
-| `npm run format:check` | Fails if a file is not formatted.                              |
-| `npm run policy`       | Checks workflows, line endings, forbidden text and wiki links. |
-| `npm run lint`         | Runs `format:check` and `policy`.                              |
+| Command                | What it does                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------- |
+| `npm test`             | Runs the unit tests in `tests/unit` with the Node test runner.                  |
+| `npm run format`       | Rewrites files with Prettier.                                                   |
+| `npm run format:check` | Fails if a file is not formatted.                                               |
+| `npm run policy`       | Checks workflows, line endings, forbidden text in tracked files and wiki links. |
+| `npm run lint`         | Runs `format:check` and `policy`.                                               |
 
 Run `npm test` and `npm run lint` before you push. Both must exit with 0.
 

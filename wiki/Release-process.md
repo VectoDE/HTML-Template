@@ -31,7 +31,7 @@ Check the signature of the archive and of the SBOM:
 ```sh
 cosign verify-blob \
   --bundle html-template-<v>.tar.gz.sigstore.json \
-  --certificate-identity-regexp 'https://github.com/VectoDE/HTML-Template/.github/workflows/release.yml@refs/tags/v.*' \
+  --certificate-identity-regexp '^https://github\.com/VectoDE/HTML-Template/\.github/workflows/release\.yml@refs/tags/v[0-9].*$' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   html-template-<v>.tar.gz
 ```
@@ -53,7 +53,7 @@ Both commands print a success message and exit with 0. Any other result means ve
 
 1. Make sure `main` is green and `package.json` has the new version.
 2. Create an annotated tag `v<version>` on the commit and push it.
-3. The `build` job runs lint and tests, packages the archive and creates the SBOM. The `provenance` and `sign` jobs run next. The `publish` job needs approval of the `release` environment, then creates the GitHub release.
+3. The `build` job runs lint and tests, packages the archive and creates the SBOM. The `provenance` and `sign` jobs run next. The `publish` job then creates the GitHub release. It runs in the `release` environment, which accepts only tags that match `v*`. There is no manual approval step.
 4. Verify the release with the commands above before announcing it.
 
 See the [[Roadmap]] for which stage produces which pre-release.
