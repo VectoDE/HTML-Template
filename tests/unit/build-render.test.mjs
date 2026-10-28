@@ -157,7 +157,8 @@ test('renderTopicPage spec plate: Baseline, interface, permission, spec', () => 
     interface: null,
   });
   assert.ok(bare.includes('None'));
-  assert.ok(!bare.includes('developer.mozilla.org'));
+  assert.ok(!bare.includes('<dt>MDN</dt>'));
+  assert.ok(!bare.includes('MDN Web Docs'));
 });
 
 test('renderTopicPage escapes quotes in link targets', () => {
