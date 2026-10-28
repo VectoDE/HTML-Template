@@ -11,12 +11,12 @@ WIKI_URL="https://github.com/VectoDE/HTML-Template.wiki.git"
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 
-if [ ! -d wiki ]; then
+if [[ ! -d wiki ]]; then
   echo "wiki/ does not exist in $repo_root" >&2
   exit 1
 fi
 
-if [ -n "$(git status --porcelain -- wiki)" ]; then
+if [[ -n "$(git status --porcelain -- wiki)" ]]; then
   echo "wiki/ has uncommitted changes. Commit or discard them first." >&2
   exit 1
 fi
@@ -29,8 +29,8 @@ git clone --quiet "$WIKI_URL" "$workdir/wiki"
 
 # Remove pages that were deleted from wiki/.
 for existing in "$workdir"/wiki/*.md; do
-  [ -e "$existing" ] || continue
-  if [ ! -e "wiki/$(basename "$existing")" ]; then
+  [[ -e "$existing" ]] || continue
+  if [[ ! -e "wiki/$(basename "$existing")" ]]; then
     rm -- "$existing"
   fi
 done

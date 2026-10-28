@@ -1,5 +1,16 @@
-const WIKI_LINK = /\[\[([^\]]+)\]\]/g;
-const MARKDOWN_LINK = /\]\(([^)\s]+)\)/g;
+// Collect the text between each "open" and the next "close" on one line.
+function between(line, open, close) {
+  const found = [];
+  let from = 0;
+  for (;;) {
+    const start = line.indexOf(open, from);
+    if (start === -1) return found;
+    const end = line.indexOf(close, start + open.length);
+    if (end === -1) return found;
+    found.push(line.slice(start + open.length, end));
+    from = end + close.length;
+  }
+}
 
 function stripCode(text) {
   const kept = [];
@@ -35,12 +46,11 @@ function isInternal(target) {
 
 function linksIn(line) {
   const found = [];
-  for (const match of line.matchAll(WIKI_LINK)) {
-    const parts = match[1].split('|');
-    found.push(parts.at(-1));
+  for (const inner of between(line, '[[', ']]')) {
+    found.push(inner.split('|').at(-1));
   }
-  for (const match of line.matchAll(MARKDOWN_LINK)) {
-    if (isInternal(match[1])) found.push(match[1]);
+  for (const target of between(line, '](', ')')) {
+    if (isInternal(target.trim()) && !target.includes(' ')) found.push(target);
   }
   return found;
 }
