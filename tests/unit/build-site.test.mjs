@@ -398,3 +398,28 @@ test('main accepts another folder below dist', async () => {
   assert.equal(code, 0);
   assert.ok(await exists(join(root, 'dist/preview/index.html')));
 });
+
+test('a demo key above unit level exits 1 and names file and key', async () => {
+  const root = await project();
+  await writeTree(root, {
+    'content/html/dialog/topic.md': topicMd('\n'),
+    'content/html/dialog/01-modal.demo.html': demoHtml('css.properties'),
+  });
+  const { code, err } = await run(root);
+  assert.equal(code, 1);
+  assert.match(
+    err,
+    /content\/html\/dialog\/01-modal\.demo\.html:1 key css\.properties is above unit level; list a unit such as css\.properties\.<name>/,
+  );
+  assert.ok(!err.includes('    at '));
+});
+
+test('a broken exclusions file exits 1 with file and line, no stack', async () => {
+  for (const text of ['{ nope', '{"key": "x"}']) {
+    const root = await project({ 'content/coverage/exclusions.json': text });
+    const { code, err } = await run(root);
+    assert.equal(code, 1);
+    assert.match(err, /^content\/coverage\/exclusions\.json:1 /);
+    assert.ok(!err.includes('    at '));
+  }
+});

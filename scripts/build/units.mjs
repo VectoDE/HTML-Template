@@ -32,6 +32,16 @@ export function unitOf(key, index) {
   return index.get(key)?.compat ? { unit: key, level: 'table' } : null;
 }
 
+// How many levels a key sits above unit depth inside a feature-level
+// namespace, or 0. Such a key (css.properties) has no __compat of its own,
+// so it names no unit. Table-level groups (http) are a whole table instead.
+export function levelsAboveUnit(key, index) {
+  const parts = key.split('.');
+  const rule = RULES.find((r) => startsWith(parts, r.parts));
+  if (rule?.level !== 'feature' || unitOf(key, index) !== null) return 0;
+  return rule.parts.length + rule.depth - parts.length;
+}
+
 // Every unit in the data, with or without its own __compat block.
 export function listUnits(index) {
   const units = [];

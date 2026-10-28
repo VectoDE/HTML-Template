@@ -11,7 +11,12 @@ import { BROWSERS } from './config.mjs';
 import { byText, indexBaseline, indexCompat, resolveKey } from './compat.mjs';
 import { loadContent } from './content.mjs';
 import { loadCompatData } from './data.mjs';
-import { checkTables, referenceTable, tableRootsFor } from './tables.mjs';
+import {
+  aboveUnitError,
+  checkTables,
+  referenceTable,
+  tableRootsFor,
+} from './tables.mjs';
 import { isDeprecated, listUnits, makeExcluded, unitOf } from './units.mjs';
 
 const DIR = 'content/coverage';
@@ -46,7 +51,7 @@ const plain = (value) => structuredClone(value);
 
 function checkExclusions(exclusions, index, errors) {
   if (!Array.isArray(exclusions)) {
-    errors.push(`${FILES.exclusions}: must be a list of { key, reason }`);
+    errors.push(`${FILES.exclusions}:1 must be a list of { key, reason }`);
     return [];
   }
   const valid = [];
@@ -54,24 +59,24 @@ function checkExclusions(exclusions, index, errors) {
   for (const [i, entry] of exclusions.entries()) {
     if (!isObject(entry) || typeof entry.key !== 'string') {
       errors.push(
-        `${FILES.exclusions}: entry ${i + 1} must be { "key": "...", "reason": "..." }`,
+        `${FILES.exclusions}:1 entry ${i + 1} must be { "key": "...", "reason": "..." }`,
       );
       continue;
     }
     const { key } = entry;
     if (seen.has(key)) {
-      errors.push(`${FILES.exclusions}: ${key} is listed more than once`);
+      errors.push(`${FILES.exclusions}:1 ${key} is listed more than once`);
     }
     seen.add(key);
     if (!index.has(key)) {
       errors.push(
-        `${FILES.exclusions}: ${key} does not exist in the compat data`,
+        `${FILES.exclusions}:1 ${key} does not exist in the compat data`,
       );
     }
     const reason = typeof entry.reason === 'string' ? entry.reason.trim() : '';
     if (reason.length < MIN_REASON) {
       errors.push(
-        `${FILES.exclusions}: ${key} needs a reason of at least ${MIN_REASON} characters`,
+        `${FILES.exclusions}:1 ${key} needs a reason of at least ${MIN_REASON} characters`,
       );
     }
     valid.push(key);
@@ -83,7 +88,7 @@ function checkPendingShape(pending, errors) {
   if (Array.isArray(pending) && pending.every((k) => typeof k === 'string')) {
     return pending;
   }
-  errors.push(`${FILES.pending}: must be a list of keys`);
+  errors.push(`${FILES.pending}:1 must be a list of keys`);
   return [];
 }
 
@@ -145,7 +150,7 @@ function coveredUnits(units, listed, index, errors) {
       covered.add(found.unit);
     } else {
       errors.push(
-        `${file}: ${key} is in a deprecated appendix, but ${found.unit} is neither deprecated nor removed`,
+        `${file}:1 ${key} is in a deprecated appendix, but ${found.unit} is neither deprecated nor removed`,
       );
     }
   }
@@ -155,12 +160,17 @@ function coveredUnits(units, listed, index, errors) {
 function checkListed(listed, index, excluded, errors) {
   for (const { key, file } of [...listed.demo, ...listed.table]) {
     if (!index.has(key)) {
-      errors.push(`${file}: ${key} does not exist in the compat data`);
+      errors.push(`${file}:1 ${key} does not exist in the compat data`);
+      continue;
+    }
+    const tooBroad = aboveUnitError(key, file, index);
+    if (tooBroad !== null) {
+      errors.push(tooBroad);
       continue;
     }
     const unit = unitOf(key, index)?.unit;
     if (excluded(key) || (unit !== undefined && excluded(unit))) {
-      errors.push(`${file}: ${key} is both excluded and covered`);
+      errors.push(`${file}:1 ${key} is both excluded and covered`);
     }
   }
 }
@@ -170,24 +180,26 @@ function checkPending(pending, expected, unitKeys, index, errors) {
   const given = new Set();
   for (const key of pending) {
     if (given.has(key)) {
-      errors.push(`${FILES.pending}: ${key} is listed more than once`);
+      errors.push(`${FILES.pending}:1 ${key} is listed more than once`);
       continue;
     }
     given.add(key);
     if (!index.has(key)) {
-      errors.push(`${FILES.pending}: ${key} does not exist in the compat data`);
+      errors.push(
+        `${FILES.pending}:1 ${key} does not exist in the compat data`,
+      );
     } else if (!unitKeys.has(key)) {
-      errors.push(`${FILES.pending}: ${key} is not a unit, ${FIX}`);
+      errors.push(`${FILES.pending}:1 ${key} is not a unit, ${FIX}`);
     } else if (!wanted.has(key)) {
       errors.push(
-        `${FILES.pending}: ${key} is in pending.json but is covered or excluded`,
+        `${FILES.pending}:1 ${key} is in pending.json but is covered or excluded`,
       );
     }
   }
   for (const key of expected) {
     if (!given.has(key)) {
       errors.push(
-        `${FILES.pending}: ${key} is not covered, excluded or pending. Add a demo or table, add an exclusion with a reason, or ${FIX}`,
+        `${FILES.pending}:1 ${key} is not covered, excluded or pending. Add a demo or table, add an exclusion with a reason, or ${FIX}`,
       );
     }
   }
@@ -218,24 +230,24 @@ function claimChanges(before, after) {
 
 function checkClaims(claims, expected, errors) {
   if (!isObject(claims)) {
-    errors.push(`${FILES.claims}: must be an object of key to support`);
+    errors.push(`${FILES.claims}:1 must be an object of key to support`);
     return;
   }
   const keys = new Set([...Object.keys(claims), ...Object.keys(expected)]);
   for (const key of [...keys].toSorted(byText)) {
     if (!Object.hasOwn(expected, key)) {
       errors.push(
-        `${FILES.claims}: ${key} is in claims.json but no demo lists it, ${FIX}`,
+        `${FILES.claims}:1 ${key} is in claims.json but no demo lists it, ${FIX}`,
       );
     } else if (!Object.hasOwn(claims, key)) {
       errors.push(
-        `${FILES.claims}: ${key} has no recorded claim, ${FIX} and review the diff`,
+        `${FILES.claims}:1 ${key} has no recorded claim, ${FIX} and review the diff`,
       );
     } else {
       const parts = claimChanges(claims[key], expected[key]);
       if (parts.length > 0) {
         errors.push(
-          `${FILES.claims}: ${key} changed (${parts.join('; ')}), ${FIX} and review the diff`,
+          `${FILES.claims}:1 ${key} changed (${parts.join('; ')}), ${FIX} and review the diff`,
         );
       }
     }
@@ -292,7 +304,7 @@ export function checkCoverage({
   checkPending(pendingKeys, expectedPending, unitKeys, index, errors);
   if (strict && expectedPending.length > 0) {
     errors.push(
-      `${FILES.pending}: strict mode needs every unit covered or excluded, ${expectedPending.length} still pending`,
+      `${FILES.pending}:1 strict mode needs every unit covered or excluded, ${expectedPending.length} still pending`,
     );
   }
 
@@ -305,6 +317,7 @@ export function checkCoverage({
       referenceTable(tableRootsFor(t, index), index, excluded),
     ]),
   );
+  // The table is generated from the data, so this is a regression guard.
   errors.push(...checkTables(topics, tables, index, excluded));
   return { errors, counts, expectedPending, expectedClaims };
 }

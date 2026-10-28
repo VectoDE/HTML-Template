@@ -18,11 +18,12 @@ import {
   buildTopicData,
 } from './outputs.mjs';
 import { renderHomePage, renderTopicPage } from './render.mjs';
-import { referenceTable, tableRootsFor } from './tables.mjs';
+import { aboveUnitError, referenceTable, tableRootsFor } from './tables.mjs';
 import { makeExcluded } from './units.mjs';
 
 const DEFAULT_OUT = 'dist/site';
 const DIST = 'dist';
+const EXCLUSIONS = 'content/coverage/exclusions.json';
 
 const byPath = ([a], [b]) => {
   if (a < b) return -1;
@@ -44,6 +45,16 @@ export function buildSite({
     ]),
   );
   const errors = [];
+  for (const topic of topics) {
+    const listed = [
+      ...topic.tables.map((key) => [key, topic.file]),
+      ...topic.demos.flatMap((d) => d.features.map((key) => [key, d.file])),
+    ];
+    for (const [key, file] of listed) {
+      const tooBroad = aboveUnitError(key, file, index);
+      if (tooBroad !== null) errors.push(tooBroad);
+    }
+  }
   const built = topics.map((topic) => {
     const table = tablesByTopic.get(topic.url);
     const result = buildTopicData(topic, { index, baseline, table, site });
@@ -126,14 +137,20 @@ async function writeFiles(dir, files) {
 }
 
 async function readExclusions(root) {
+  let list;
   try {
-    return JSON.parse(
-      await readFile(join(root, 'content/coverage/exclusions.json'), 'utf8'),
-    );
+    list = JSON.parse(await readFile(join(root, EXCLUSIONS), 'utf8'));
   } catch (error) {
-    if (error?.code === 'ENOENT') return [];
+    if (error?.code === 'ENOENT') return { list: [] };
+    if (error instanceof SyntaxError) {
+      return { error: `${EXCLUSIONS}:1 is not valid JSON` };
+    }
     throw error;
   }
+  if (!Array.isArray(list)) {
+    return { error: `${EXCLUSIONS}:1 must be a list of { key, reason }` };
+  }
+  return { list };
 }
 
 export async function main(
@@ -165,12 +182,20 @@ export async function main(
     );
     return 1;
   }
+  const read = await readExclusions(rootDir);
+  if (read.error !== undefined) {
+    stderr.write(`${read.error}
+
+build: failed (1 problem(s))
+`);
+    return 1;
+  }
   const data = await load();
   const { files, errors } = buildSite({
     topics: content.topics,
     index: indexCompat(data.bcd),
     baseline: indexBaseline(data.webFeatures),
-    exclusions: await readExclusions(rootDir),
+    exclusions: read.list,
   });
   if (errors.length > 0) {
     stderr.write(

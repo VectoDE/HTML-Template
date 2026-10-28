@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { BROWSERS } from '../../scripts/build/config.mjs';
 import { indexCompat } from '../../scripts/build/compat.mjs';
 import {
+  aboveUnitError,
   checkTables,
   referenceTable,
   tableRootsFor,
@@ -17,6 +18,7 @@ const keys = (rows) => rows.map((r) => r.key);
 function topic(url, features, tables = []) {
   return {
     url,
+    file: `content${url}topic.md`,
     tables,
     demos: features.map((list, i) => ({ id: `demo-${i + 1}`, features: list })),
   };
@@ -130,7 +132,7 @@ test('checkTables fails when a row of the demo unit is dropped', () => {
     ],
   ]);
   assert.deepEqual(checkTables(topics, tables, index, none), [
-    '/html/dialog/: sub-entry html.elements.dialog.open missing from the reference table',
+    'content/html/dialog/topic.md:1 sub-entry html.elements.dialog.open missing from the reference table',
   ]);
 });
 
@@ -143,8 +145,8 @@ test('checkTables fails when a row of a table-level unit is dropped', () => {
   assert.deepEqual(keys(full), [csp, `${csp}.script-src`, `${csp}.style-src`]);
   const tables = new Map([['/http/csp/', full.slice(1, 2)]]);
   assert.deepEqual(checkTables(topics, tables, index, none), [
-    `/http/csp/: sub-entry ${csp} missing from the reference table`,
-    `/http/csp/: sub-entry ${csp}.style-src missing from the reference table`,
+    `content/http/csp/topic.md:1 sub-entry ${csp} missing from the reference table`,
+    `content/http/csp/topic.md:1 sub-entry ${csp}.style-src missing from the reference table`,
   ]);
   tables.set('/http/csp/', full);
   assert.deepEqual(checkTables(topics, tables, index, none), []);
@@ -161,8 +163,8 @@ test('checkTables accepts excluded rows and reports a missing table', () => {
   ]);
   assert.deepEqual(checkTables(topics, tables, index, excluded), []);
   assert.deepEqual(checkTables(topics, new Map(), index, excluded), [
-    '/html/dialog/: sub-entry html.elements.dialog missing from the reference table',
-    '/html/dialog/: sub-entry html.elements.dialog.closedby missing from the reference table',
+    'content/html/dialog/topic.md:1 sub-entry html.elements.dialog missing from the reference table',
+    'content/html/dialog/topic.md:1 sub-entry html.elements.dialog.closedby missing from the reference table',
   ]);
 });
 
@@ -178,9 +180,35 @@ test('two topics claiming one unit both list it', () => {
     ['/b/', full.filter((r) => r.key === 'html.elements.dialog.open')],
   ]);
   assert.deepEqual(checkTables(topics, tables, index, none), [
-    '/b/: sub-entry html.elements.dialog missing from the reference table',
-    '/b/: sub-entry html.elements.dialog.closedby missing from the reference table',
+    'content/b/topic.md:1 sub-entry html.elements.dialog missing from the reference table',
+    'content/b/topic.md:1 sub-entry html.elements.dialog.closedby missing from the reference table',
   ]);
   tables.set('/b/', full);
   assert.deepEqual(checkTables(topics, tables, index, none), []);
+});
+
+test('aboveUnitError names keys above unit level, with the file and line', () => {
+  // css.properties has no __compat of its own, like the real data.
+  assert.equal(
+    aboveUnitError('css.properties', 'content/css/t/topic.md', index),
+    'content/css/t/topic.md:1 key css.properties is above unit level; list a unit such as css.properties.<name>',
+  );
+  assert.equal(
+    aboveUnitError('api', 'content/api/t/topic.md', index),
+    'content/api/t/topic.md:1 key api is above unit level; list a unit such as api.<name>',
+  );
+  // Units, table-level groups with their own __compat, unknown keys and
+  // keys outside the counted namespaces are not this error.
+  for (const key of [
+    'css.properties.zoom',
+    'css.properties.zoom.x',
+    'http',
+    'http.headers',
+    'javascript.classes',
+    'html.global_attributes',
+    'css.nope',
+    'html.elements.nope',
+  ]) {
+    assert.equal(aboveUnitError(key, 'f', index), null, key);
+  }
 });

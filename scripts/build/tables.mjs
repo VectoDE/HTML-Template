@@ -2,7 +2,7 @@
 // so no part of a covered feature goes unmentioned (spec §8.4).
 
 import { byText, extractSupport, statusOf } from './compat.mjs';
-import { unitOf } from './units.mjs';
+import { levelsAboveUnit, unitOf } from './units.mjs';
 
 const lastSegment = (key) => key.slice(key.lastIndexOf('.') + 1);
 
@@ -48,6 +48,16 @@ export function referenceTable(claimRoots, index, excluded) {
 // counted namespaces stay as written.
 const rootOf = (key, index) => unitOf(key, index)?.unit ?? key;
 
+// The error for a key that lies in a counted namespace but above unit
+// depth, or null. A table for it would cover no unit.
+export function aboveUnitError(key, file, index) {
+  if (!index.has(key)) return null;
+  const levels = levelsAboveUnit(key, index);
+  if (levels === 0) return null;
+  const hint = `${key}${'.<name>'.repeat(levels)}`;
+  return `${file}:1 key ${key} is above unit level; list a unit such as ${hint}`;
+}
+
 export function tableRootsFor(topic, index) {
   const keys = [...topic.tables, ...topic.demos.flatMap((d) => d.features)];
   return [...new Set(keys.map((key) => rootOf(key, index)))].toSorted(byText);
@@ -63,7 +73,7 @@ export function checkTables(topics, tablesByTopic, index, excluded) {
     for (const { key } of wanted) {
       if (!listed.has(key)) {
         errors.push(
-          `${topic.url}: sub-entry ${key} missing from the reference table`,
+          `${topic.file}:1 sub-entry ${key} missing from the reference table`,
         );
       }
     }

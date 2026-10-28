@@ -119,7 +119,7 @@ test('a new unit missing from pending names the key and the fix', () => {
   assert.equal(report.errors.length, 1);
   assert.equal(
     report.errors[0],
-    `${PENDING}: api.New is not covered, excluded or pending. Add a demo or table, add an exclusion with a reason, or run npm run coverage:update`,
+    `${PENDING}:1 api.New is not covered, excluded or pending. Add a demo or table, add an exclusion with a reason, or run npm run coverage:update`,
   );
 });
 
@@ -525,4 +525,21 @@ test('main --update repairs invalid pending.json and claims.json', async () => {
     Array.isArray(JSON.parse(await readFile(join(root, PENDING), 'utf8'))),
   );
   assert.equal(await readFile(join(root, CLAIMS), 'utf8'), '{}\n');
+});
+
+test('a key above unit level is named with file and line', () => {
+  const report = run({
+    topics: [
+      topic({ features: [['css.properties']], tables: ['css.properties'] }),
+    ],
+  });
+  assert.ok(
+    has(
+      report,
+      'content/html/t/01-d.demo.html:1 key css.properties is above unit level',
+    ),
+  );
+  assert.ok(
+    has(report, 'content/html/t/topic.md:1 key css.properties is above unit'),
+  );
 });
