@@ -59,9 +59,14 @@ Commits, pull requests, issues and docs must not carry tool attribution trailers
 
 - Keep a pull request to one topic.
 - Run `npm run lint` and `npm test` before you push. Both must exit 0.
+- New functionality and bug fixes come with automated tests. A pull request that changes behaviour without tests is not merged. Tests live in `tests/unit`, and `npm run test:coverage` must stay at 80 percent or higher for lines, branches and functions.
 - Fill in the pull request template.
 - Content changes need a source: MDN, the specification or a browser release note.
 - Write plain English: short, specific sentences, and no claims about how good a feature is.
+
+## Governance
+
+How decisions are made and how to become a maintainer is described in [GOVERNANCE.md](GOVERNANCE.md).
 
 ## Writing a demo
 
