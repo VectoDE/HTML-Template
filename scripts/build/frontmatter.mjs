@@ -140,9 +140,11 @@ function parseBlock(lines, file, firstLine) {
   return data;
 }
 
+const BYTE_ORDER_MARK = String.fromCodePoint(0xfeff);
+
 // A UTF-8 byte order mark some editors put at the start of a file.
 export function stripBom(text) {
-  return text.startsWith('﻿') ? text.slice(1) : text;
+  return text.startsWith(BYTE_ORDER_MARK) ? text.slice(1) : text;
 }
 
 export function parseFrontMatter(text, file) {

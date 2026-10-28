@@ -45,23 +45,17 @@ export function indexCompat(bcd) {
 
 // --- support --------------------------------------------------------------
 
-// Lower is better: the plain, current statement first, flags last.
-function statementRank(statement) {
-  if (statement.flags) return 3;
-  if (statement.prefix || statement.alternative_name) return 2;
-  return statement.version_removed ? 1 : 0;
-}
+const isPlain = (statement) =>
+  isObject(statement) &&
+  !statement.flags &&
+  !statement.prefix &&
+  !statement.alternative_name &&
+  !statement.version_removed;
 
+// The first plain statement, else the first one with its annotations.
 function chooseStatement(raw) {
   const list = Array.isArray(raw) ? raw : [raw];
-  let best = null;
-  for (const statement of list) {
-    if (!isObject(statement)) continue;
-    if (best === null || statementRank(statement) < statementRank(best)) {
-      best = statement;
-    }
-  }
-  return best;
+  return list.find(isPlain) ?? list.find(isObject) ?? null;
 }
 
 // "≤4" means "4 or earlier": the number stays, approx marks it.
@@ -173,11 +167,12 @@ export function resolveKey(key, index, baseline) {
   };
 }
 
-// The weakest status of the keys with the latest year among them. Keys
-// without Baseline data are left out.
+// The weakest status of the keys, with the latest year among them. A key
+// without Baseline data is the weakest of all: the topic is then unknown.
 export function topicBaseline(resolved) {
-  const known = resolved.map((r) => r.baseline).filter(Boolean);
-  if (known.length === 0) return { status: null, year: null };
+  const none = { status: null, year: null };
+  if (resolved.length === 0 || resolved.some((r) => !r.baseline)) return none;
+  const known = resolved.map((r) => r.baseline);
   const status = known.reduce(
     (weakest, b) => (RANK[b.status] < RANK[weakest] ? b.status : weakest),
     known[0].status,

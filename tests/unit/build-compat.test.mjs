@@ -176,6 +176,18 @@ test('resolveKey', () => {
   assert.equal(resolveKey('html.elements', index, baseline).mdn, null);
 });
 
+test('extractSupport falls back to the first statement as it is', () => {
+  const s = extractSupport({
+    support: {
+      chrome: [
+        { version_added: '30', flags: [{ type: 'preference', name: 'x' }] },
+        { version_added: '18', prefix: '-webkit-' },
+      ],
+    },
+  });
+  assert.deepEqual(s.chrome, { added: '30', flags: true });
+});
+
 test('topicBaseline', () => {
   const r = (status, year) => ({ baseline: { status, year } });
   assert.deepEqual(topicBaseline([r('high', 2022), r('low', 2024)]), {
@@ -189,6 +201,14 @@ test('topicBaseline', () => {
   assert.deepEqual(topicBaseline([r('high', 2020), r('high', 2022)]), {
     status: 'high',
     year: 2022,
+  });
+  assert.deepEqual(topicBaseline([r('high', 2022), { baseline: null }]), {
+    status: null,
+    year: null,
+  });
+  assert.deepEqual(topicBaseline([r('high', 2022), r(false, null)]), {
+    status: false,
+    year: null,
   });
   assert.deepEqual(topicBaseline([]), { status: null, year: null });
   assert.deepEqual(topicBaseline([{ baseline: null }]), {
