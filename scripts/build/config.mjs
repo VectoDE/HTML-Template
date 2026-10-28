@@ -1,4 +1,4 @@
-// Shared build constants. Everything here is data, no behaviour.
+// Shared build constants, plus two helpers that turn site paths into URLs.
 
 export const CATEGORIES = Object.freeze([
   { id: 'html', label: 'HTML' },
@@ -124,3 +124,23 @@ export const UNIT_RULES = Object.freeze([
   rule('http', 'table', 2),
   rule('webassembly.api', 'table'),
 ]);
+
+// Where the shell is served. The preview origin is confirmed in stage 4.
+export const SITE = Object.freeze({
+  origin: 'https://vectode.github.io',
+  base: '/HTML-Template/',
+  name: 'HTML-Template',
+  previewOrigin: 'https://html-template-preview.pages.dev',
+});
+
+// "/html/dialog/" -> "/HTML-Template/html/dialog/". Backslashes from a
+// Windows path become "/", so a URL never carries one.
+export function pageUrl(path, site = SITE) {
+  let rel = path.replaceAll('\\', '/');
+  while (rel.startsWith('/')) rel = rel.slice(1);
+  return site.base + rel;
+}
+
+export function absoluteUrl(path, site = SITE) {
+  return site.origin + pageUrl(path, site);
+}

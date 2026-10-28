@@ -178,3 +178,53 @@ export function miniWebFeatures() {
     },
   };
 }
+
+function demo(n, overrides = {}) {
+  return {
+    title: `Demo ${n}`,
+    summary: `When to use demo ${n}.`,
+    a11y: null,
+    fallback: `Fallback ${n}.`,
+    features: ['html.elements.dialog'],
+    detect: "'HTMLDialogElement' in window",
+    runsIn: 'frame',
+    permissions: [],
+    code: { html: '<dialog>Hi</dialog>', css: '', js: '' },
+    n,
+    slug: `demo-${n}`,
+    id: `demo-${n}`,
+    file: `content/html/dialog/0${n}-demo-${n}.demo.html`,
+    ...overrides,
+  };
+}
+
+// A Topic as loadContent returns it: html/dialog with two demos.
+export function makeTopic(overrides = {}) {
+  return {
+    category: 'html',
+    slug: 'dialog',
+    url: '/html/dialog/',
+    title: 'Dialog',
+    number: 1,
+    lede: 'A modal or non-modal box.',
+    interface: 'HTMLDialogElement',
+    spec: ['https://html.spec.whatwg.org/multipage/interactive-elements.html'],
+    mdn: 'https://developer.mozilla.org/docs/Web/HTML/Element/dialog',
+    tables: [],
+    appendix: null,
+    bodyHtml: '<p>Body text.</p>',
+    demos: [
+      demo(1, {
+        a11y: 'Focus moves into the dialog.',
+        code: { html: '<dialog>Hi</dialog>', css: 'dialog{}', js: 'd()' },
+      }),
+      demo(2, {
+        features: ['html.elements.dialog.closedby'],
+        permissions: ['fullscreen', 'camera'],
+        runsIn: 'window',
+      }),
+    ],
+    file: 'content/html/dialog/topic.md',
+    ...overrides,
+  };
+}
