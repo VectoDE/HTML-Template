@@ -8,7 +8,7 @@ import { NAMESPACES, PERMISSIONS } from './config.mjs';
 const META_OPEN = '<script type="application/json" data-demo-meta>';
 const SCRIPT_CLOSE = '</script>';
 const TEMPLATE_OPEN = '<template data-lang="';
-const LANGS = ['html', 'css', 'js'];
+const LANGS = new Set(['html', 'css', 'js']);
 const REQUIRED = [
   'title',
   'summary',
@@ -17,8 +17,8 @@ const REQUIRED = [
   'detect',
   'runsIn',
 ];
-const OPTIONAL = ['a11y', 'permissions'];
-const RUNS_IN = ['frame', 'window'];
+const OPTIONAL = new Set(['a11y', 'permissions']);
+const RUNS_IN = new Set(['frame', 'window']);
 const DETECT_MAX = 200;
 
 function isBlank(ch) {
@@ -94,9 +94,7 @@ function checkDetect(value) {
 }
 
 function checkRunsIn(value) {
-  return RUNS_IN.includes(value)
-    ? null
-    : '"runsIn" must be "frame" or "window"';
+  return RUNS_IN.has(value) ? null : '"runsIn" must be "frame" or "window"';
 }
 
 const SPECIAL = {
@@ -115,7 +113,7 @@ function keyProblem(meta, key) {
 
 function metaProblem(meta) {
   for (const key of Object.keys(meta)) {
-    if (!REQUIRED.includes(key) && !OPTIONAL.includes(key)) {
+    if (!REQUIRED.includes(key) && !OPTIONAL.has(key)) {
       return `unknown key "${key}"`;
     }
   }
@@ -207,7 +205,7 @@ function readLangName(text, at, file) {
     );
   }
   const lang = text.slice(from, quote);
-  if (!LANGS.includes(lang)) {
+  if (!LANGS.has(lang)) {
     throw new ContentError(file, line, `unknown data-lang "${lang}"`);
   }
   return { lang, bodyStart: quote + 2, line };

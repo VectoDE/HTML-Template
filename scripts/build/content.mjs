@@ -14,8 +14,8 @@ const SKIPPED = 'coverage';
 const TOPIC_FILE = 'topic.md';
 const DEMO_SUFFIX = '.demo.html';
 const REQUIRED = ['title', 'number', 'lede', 'spec'];
-const OPTIONAL = ['interface', 'mdn', 'tables', 'appendix'];
-const READ_CODES = ['ENOENT', 'ENOTDIR', 'EACCES'];
+const OPTIONAL = new Set(['interface', 'mdn', 'tables', 'appendix']);
+const READ_CODES = new Set(['ENOENT', 'ENOTDIR', 'EACCES']);
 
 // --- small checks ---------------------------------------------------------
 
@@ -87,7 +87,7 @@ const CHECKS = {
 
 function frontProblem(data) {
   const unknown = Object.keys(data).find(
-    (k) => !REQUIRED.includes(k) && !OPTIONAL.includes(k),
+    (k) => !REQUIRED.includes(k) && !OPTIONAL.has(k),
   );
   if (unknown) return `unknown key "${unknown}"`;
   const missing = REQUIRED.find((k) => !Object.hasOwn(data, k));
@@ -136,7 +136,7 @@ function createContext(dir, io) {
         const entries = await io.readdir(where, { withFileTypes: true });
         return entries.sort((a, b) => (a.name < b.name ? -1 : 1));
       } catch (error) {
-        if (!READ_CODES.includes(error?.code)) throw error;
+        if (!READ_CODES.has(error?.code)) throw error;
         errors.push(`${rel}:1 cannot read this folder (${error.code})`);
         return [];
       }
@@ -155,8 +155,9 @@ function createContext(dir, io) {
   };
 }
 
-async function loadDemos(ctx, rel, entries) {
-  const demos = [];
+// Valid demo files with their parsed name; problems are reported here.
+function demoFiles(ctx, rel, entries) {
+  const found = [];
   const seen = new Set();
   for (const entry of entries.filter((e) => e.name.endsWith(DEMO_SUFFIX))) {
     const file = `${rel}/${entry.name}`;
@@ -167,21 +168,24 @@ async function loadDemos(ctx, rel, entries) {
       ctx.fail(file, `duplicate demo number ${name.nn} in this topic`);
     } else {
       seen.add(name.nn);
+      found.push({ file, name });
+    }
+  }
+  return found;
+}
+
+async function loadDemos(ctx, rel, entries) {
+  const loaded = await Promise.all(
+    demoFiles(ctx, rel, entries).map(async ({ file, name }) => {
       const demo = await ctx.attempt(async () =>
         parseDemo(await ctx.read(file), file),
       );
-      if (demo) {
-        demos.push({
-          ...demo,
-          n: name.n,
-          slug: name.slug,
-          id: `demo-${name.n}`,
-          file,
-        });
-      }
-    }
-  }
-  return demos.sort((a, b) => a.n - b.n);
+      if (!demo) return null;
+      const { n, slug } = name;
+      return { ...demo, n, slug, id: `demo-${n}`, file };
+    }),
+  );
+  return loaded.filter(Boolean).sort((x, y) => x.n - y.n);
 }
 
 function reportStray(ctx, rel, entries) {
@@ -232,19 +236,19 @@ async function loadTopic(ctx, category, slug) {
 
 async function loadCategory(ctx, category) {
   const rel = `${ROOT}/${category}`;
-  const topics = [];
-  for (const entry of await ctx.list(rel)) {
-    if (!entry.isDirectory()) {
-      ctx.fail(
-        `${rel}/${entry.name}`,
-        'unexpected file, expected topic folders only',
-      );
-      continue;
-    }
-    const topic = await loadTopic(ctx, category, entry.name);
-    if (topic) topics.push(topic);
+  const entries = await ctx.list(rel);
+  for (const entry of entries.filter((e) => !e.isDirectory())) {
+    ctx.fail(
+      `${rel}/${entry.name}`,
+      'unexpected file, expected topic folders only',
+    );
   }
-  return topics;
+  const topics = await Promise.all(
+    entries
+      .filter((e) => e.isDirectory())
+      .map((e) => loadTopic(ctx, category, e.name)),
+  );
+  return topics.filter(Boolean);
 }
 
 function checkNumbers(ctx, topics) {
@@ -271,11 +275,16 @@ function sortTopics(topics) {
   );
 }
 
-// contentDir is the content/ folder itself.
-export async function loadContent(contentDir, io = fs) {
-  const ctx = createContext(contentDir, io);
-  const topics = [];
-  for (const entry of await ctx.list(ROOT)) {
+function compareText(x, y) {
+  if (x < y) return -1;
+  return x > y ? 1 : 0;
+}
+
+// Sorts out the top level: skips coverage/, reports files and unknown folders,
+// and returns the known category ids.
+function categoryIds(ctx, entries) {
+  const ids = [];
+  for (const entry of entries) {
     if (entry.name === SKIPPED && entry.isDirectory()) continue;
     const known = CATEGORIES.some((c) => c.id === entry.name);
     if (!entry.isDirectory()) {
@@ -283,13 +292,23 @@ export async function loadContent(contentDir, io = fs) {
         `${ROOT}/${entry.name}`,
         'unexpected file, expected category folders only',
       );
-    } else if (!known) {
-      ctx.fail(`${ROOT}/${entry.name}`, `unknown category "${entry.name}"`);
+    } else if (known) {
+      ids.push(entry.name);
     } else {
-      topics.push(...(await loadCategory(ctx, entry.name)));
+      ctx.fail(`${ROOT}/${entry.name}`, `unknown category "${entry.name}"`);
     }
   }
+  return ids;
+}
+
+// contentDir is the content/ folder itself.
+export async function loadContent(contentDir, io = fs) {
+  const ctx = createContext(contentDir, io);
+  const ids = categoryIds(ctx, await ctx.list(ROOT));
+  const topics = (
+    await Promise.all(ids.map((id) => loadCategory(ctx, id)))
+  ).flat();
   sortTopics(topics);
   checkNumbers(ctx, topics);
-  return { topics, errors: ctx.errors.sort() };
+  return { topics, errors: ctx.errors.toSorted(compareText) };
 }
