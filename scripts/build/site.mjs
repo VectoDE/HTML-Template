@@ -93,11 +93,13 @@ function safeOut(root, out) {
 
 async function writeFiles(dir, files) {
   await rm(dir, { recursive: true, force: true });
-  for (const [path, text] of files) {
-    const target = join(dir, path);
-    await mkdir(dirname(target), { recursive: true });
-    await writeFile(target, text.replaceAll('\r\n', '\n'));
-  }
+  await Promise.all(
+    [...files].map(async ([path, text]) => {
+      const target = join(dir, path);
+      await mkdir(dirname(target), { recursive: true });
+      await writeFile(target, text.replaceAll('\r\n', '\n'));
+    }),
+  );
 }
 
 export async function main(
