@@ -61,6 +61,21 @@ export function miniBcd() {
         },
       },
     },
+    // Rule prefixes (or nodes above unit depth) with their own __compat,
+    // and a counted-namespace node outside every rule.
+    javascript: {
+      classes: {
+        ...compat(everywhere('49')),
+        private_class_fields: compat(everywhere('74')),
+      },
+    },
+    http: {
+      'data-url': {
+        ...compat(everywhere('1')),
+        css_files: compat(everywhere('1')),
+      },
+    },
+    webassembly: { instructions: { i32: compat(everywhere('57')) } },
     css: {
       properties: {
         zoom: compat(

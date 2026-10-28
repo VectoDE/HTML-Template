@@ -87,7 +87,31 @@ test('listUnits is sorted and includes units without __compat', () => {
     { unit: 'api.Old', level: 'feature' },
     { unit: 'css.properties.zoom', level: 'feature' },
     { unit: 'html.elements.dialog', level: 'feature' },
+    { unit: 'http.data-url', level: 'table' },
+    { unit: 'http.data-url.css_files', level: 'table' },
+    { unit: 'javascript.classes', level: 'table' },
+    { unit: 'javascript.classes.private_class_fields', level: 'table' },
   ]);
+});
+
+test('a rule node with its own __compat is a table unit', () => {
+  const table = (unit) => ({ unit, level: 'table' });
+  assert.deepEqual(
+    unitOf('javascript.classes', index),
+    table('javascript.classes'),
+  );
+  assert.deepEqual(unitOf('http.data-url', index), table('http.data-url'));
+  assert.deepEqual(
+    unitOf('javascript.classes.private_class_fields', index),
+    table('javascript.classes.private_class_fields'),
+  );
+  // Without the index, or without __compat, the node stays out of scope.
+  assert.equal(unitOf('javascript.classes'), null);
+  assert.equal(unitOf('html.elements', index), null);
+  assert.equal(unitOf('http.nope', index), null);
+  // Outside every rule nothing counts, __compat or not (plan call 6).
+  assert.equal(unitOf('webassembly.instructions.i32', index), null);
+  assert.equal(unitOf('javascript', index), null);
 });
 
 test('a unit with only children resolves without support', () => {

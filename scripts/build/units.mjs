@@ -14,21 +14,26 @@ const RULES = UNIT_RULES.map((r) => ({
 
 const startsWith = (parts, prefix) => prefix.every((p, i) => parts[i] === p);
 
-// The unit a key belongs to, or null when the key does not count.
-export function unitOf(key) {
+// The unit a key belongs to, or null when the key does not count. A rule's
+// prefix, or a node between it and unit depth, is a table unit of its own
+// when it carries __compat (http.data-url, javascript.classes): nothing in
+// a counted namespace may drop out. That needs the index to see __compat.
+export function unitOf(key, index) {
   const parts = key.split('.');
   const rule = RULES.find((r) => startsWith(parts, r.parts));
   if (!rule) return null;
   const size = rule.parts.length + rule.depth;
-  if (parts.length < size) return null;
-  return { unit: parts.slice(0, size).join('.'), level: rule.level };
+  if (parts.length >= size) {
+    return { unit: parts.slice(0, size).join('.'), level: rule.level };
+  }
+  return index?.get(key)?.compat ? { unit: key, level: 'table' } : null;
 }
 
 // Every unit in the data, with or without its own __compat block.
 export function listUnits(index) {
   const units = [];
   for (const key of index.keys()) {
-    const found = unitOf(key);
+    const found = unitOf(key, index);
     if (found?.unit === key) units.push(found);
   }
   return units.toSorted((a, b) => byText(a.unit, b.unit));
