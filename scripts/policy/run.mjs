@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { checkWorkflow } from './workflows.mjs';
+import { checkWikiLinks } from '../wiki/links.mjs';
 import { findAttribution } from './attribution.mjs';
 import {
   filterAttributionTargets,
@@ -17,6 +18,15 @@ if (existsSync(workflowDir)) {
     const file = `${workflowDir}/${name}`;
     problems.push(...checkWorkflow(readFileSync(file, 'utf8'), file));
   }
+}
+
+const wikiDir = 'wiki';
+if (existsSync(wikiDir)) {
+  const pages = new Map();
+  for (const name of readdirSync(wikiDir).filter((n) => n.endsWith('.md'))) {
+    pages.set(name.slice(0, -3), readFileSync(`${wikiDir}/${name}`, 'utf8'));
+  }
+  problems.push(...checkWikiLinks(pages));
 }
 
 const tracked = listTrackedTextFiles().filter((p) => existsSync(p));
