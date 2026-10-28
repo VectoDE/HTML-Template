@@ -1,7 +1,35 @@
 # HTML-Template
 
-An interactive reference for HTML, CSS and JavaScript: live demos you can edit, share and copy.
+[![CI](https://github.com/VectoDE/HTML-Template/actions/workflows/ci.yml/badge.svg)](https://github.com/VectoDE/HTML-Template/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/VectoDE/HTML-Template/actions/workflows/codeql.yml/badge.svg)](https://github.com/VectoDE/HTML-Template/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/VectoDE/HTML-Template/badge)](https://scorecard.dev/viewer/?uri=github.com/VectoDE/HTML-Template)
+[![License: MIT](https://img.shields.io/github/license/VectoDE/HTML-Template)](LICENSE)
 
-Status: Rebuild in progress (stage 1 of 7).
+HTML-Template is becoming an interactive reference for web developers. You look up a feature of HTML, CSS or JavaScript and see it working live. You change the code in the browser, watch the result, and copy it into your own project. Each feature is shown in its modern form, with the parts real projects need: accessibility, error handling and fallbacks.
 
-Licensed under the [MIT License](LICENSE).
+MDN explains features in depth but scatters the runnable examples. Playgrounds like CodePen run code but say little about it. This project puts the explanation, verified browser support, the live demo, the editor and a copyable result on one page. The site is in English only.
+
+## Status
+
+The project is being rebuilt in seven stages. Stage 1 is under way: repository, CI, OpenSSF checks, the wiki and the release pipeline. There is no deployed site yet.
+
+- [Roadmap](https://github.com/VectoDE/HTML-Template/wiki/Roadmap)
+- [Project board](https://github.com/users/VectoDE/projects/12)
+
+## Local setup
+
+You need Node.js 24 or newer. The version is pinned in `.nvmrc`.
+
+```sh
+npm ci --ignore-scripts
+npm test
+npm run lint
+```
+
+## Contributing and security
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before you open a pull request. Commits need a sign-off (`git commit -s`). Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report vulnerabilities as described in [SECURITY.md](SECURITY.md), not in public issues.
+
+## License
+
+[MIT](LICENSE)
