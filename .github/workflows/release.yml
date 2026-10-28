@@ -82,7 +82,7 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0 # NOSONAR the SLSA generator must be referenced by tag to verify its builder identity
     with:
       base64-subjects: ${{ needs.build.outputs.hashes }}
       provenance-name: html-template-${{ needs.build.outputs.version }}.intoto.jsonl
