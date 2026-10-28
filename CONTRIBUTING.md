@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping. This project is an interactive reference for HTML, CSS and JavaScript. Corrections, new demos and fixes to the site are all welcome. Please read the [Code of Conduct](CODE_OF_CONDUCT.md) first.
+This project is an interactive reference for HTML, CSS and JavaScript. Corrections and fixes to the site are welcome, and so are demo requests. Please read the [Code of Conduct](CODE_OF_CONDUCT.md) first.
 
 Security problems do not go into public issues. See [SECURITY.md](SECURITY.md).
 
@@ -27,7 +27,7 @@ npm run lint
 
 ## Dependencies
 
-Prettier is the only dev dependency in stage 1. It is the single formatter for Markdown, YAML, JSON, JavaScript and CSS, so the repository needs no per-language tooling. A new dev dependency needs a stated reason in the pull request, and the shipped site has no runtime dependencies. Do not add a package for something a few lines of code or a platform feature can do.
+Prettier is currently the only dev dependency. It formats Markdown, YAML, JSON, JavaScript and CSS, so the repository needs no per-language tooling. A new dev dependency needs a stated reason in the pull request, and the shipped site has no runtime dependencies. Do not add a package for something a few lines of code or a platform feature can do.
 
 ## Commits
 
@@ -43,8 +43,6 @@ Refs #123
 
 Every commit needs a `Signed-off-by` line, which certifies the [Developer Certificate of Origin](https://developercertificate.org/). Add it with `git commit -s`. The line must use the commit author's name and e-mail, so set `user.name` and `user.email` to the identity you commit under before you sign off. If you cherry-pick a commit or use `--author`, add the sign-off for the author of that commit yourself, for example by amending with `git commit --amend -s --author="Name <address>"`. The `dco` check on pull requests fails when a sign-off is missing or does not match the author.
 
-Do not sign commits with `-S`. The sign-off line is what the project requires.
-
 ### Attribution
 
 Commits, pull requests, issues and docs must not carry tool attribution trailers or footers. That covers any line that names a code generator or an assistant as author, co-author or origin. The policy check fails the build when it finds one.
@@ -55,11 +53,11 @@ Commits, pull requests, issues and docs must not carry tool attribution trailers
 - Run `npm run lint` and `npm test` before you push. Both must exit 0.
 - Fill in the pull request template.
 - Content changes need a source: MDN, the specification or a browser release note.
-- Write in plain English. Short, specific sentences are better than claims about how good a feature is.
+- Write plain English: short, specific sentences, and no claims about how good a feature is.
 
 ## Writing a demo
 
-Guidance on writing a demo (structure, metadata, what makes a demo worth including) will be written in the wiki page "Writing a demo" at <https://github.com/VectoDE/HTML-Template/wiki>. It is not available yet. Demo contributions open up once the demo format is final, so please check the wiki before starting one.
+A wiki page, "Writing a demo", will cover structure, metadata and what makes a demo worth including: <https://github.com/VectoDE/HTML-Template/wiki/Writing-a-demo>. It does not exist yet, so please hold off on demo pull requests until it does. Demo requests are welcome as issues.
 
 ## License
 

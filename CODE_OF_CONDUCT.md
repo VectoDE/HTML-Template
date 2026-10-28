@@ -36,7 +36,7 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at the maintainer, [@VectoDE](https://github.com/VectoDE), through a private channel on GitHub. Open a minimal issue that asks for a private channel and leaves out the details of the incident. The details are shared only once a private channel exists. All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the maintainer, [@VectoDE](https://github.com/VectoDE). Open a minimal issue that asks for a private channel and leaves out the details of the incident. Share the details only once that channel exists. All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the reporter of any incident.
 

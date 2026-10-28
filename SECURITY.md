@@ -18,7 +18,7 @@ Include what you found, the steps to reproduce it, the affected page or file, an
 
 ## What to expect
 
-This project has a single maintainer, so the times below are targets, not guarantees.
+This project has a single maintainer. Treat the times below as targets.
 
 - Acknowledgement of your report within 7 days.
 - A status update within 14 days.
@@ -44,4 +44,4 @@ Out of scope:
 
 ## Demo code isolation
 
-Demos run on a separate origin from the shell, inside a sandboxed iframe, so they cannot read the shell's IndexedDB or service worker caches. The Worker stores nothing and answers only the shell and preview origins. A way around any of this is a vulnerability and belongs in a private report.
+Demos run on a separate origin from the shell, inside a sandboxed iframe, so they cannot read the shell's IndexedDB or service worker caches. The Worker stores nothing and answers only the shell and preview origins. Report any way around these protections privately.
