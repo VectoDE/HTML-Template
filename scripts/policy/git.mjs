@@ -1,30 +1,40 @@
 import { existsSync } from 'node:fs';
-import { delimiter, join } from 'node:path';
+import { delimiter, isAbsolute, join } from 'node:path';
 
-const FIXED_DIRS = [
-  '/usr/bin',
-  '/usr/local/bin',
-  '/opt/homebrew/bin',
-  'C:\Program Files\Git\cmd',
-  'C:\Program Files (x86)\Git\cmd',
-];
+const FIXED_DIRS = {
+  win32: [
+    String.raw`C:\Program Files\Git\cmd`,
+    String.raw`C:\Program Files (x86)\Git\cmd`,
+  ],
+  posix: ['/usr/bin', '/usr/local/bin', '/opt/homebrew/bin'],
+};
 
 let cached;
 
-// Resolve the git executable once to an absolute path. Trusted system
-// locations win over whatever the PATH variable happens to contain.
-export function gitExecutable() {
-  if (cached) return cached;
-  const names = process.platform === 'win32' ? ['git.exe'] : ['git'];
-  const pathDirs = (process.env.PATH ?? '').split(delimiter).filter(Boolean);
-  for (const dir of [...FIXED_DIRS, ...pathDirs]) {
-    for (const name of names) {
-      const candidate = join(dir, name);
-      if (existsSync(candidate)) {
-        cached = candidate;
-        return cached;
-      }
-    }
+// Pure resolver: trusted system locations first, then absolute PATH entries.
+// Relative PATH entries (such as ".") are never searched.
+export function resolveGit({
+  platform = process.platform,
+  pathEnv = process.env.PATH ?? '',
+  exists = existsSync,
+  separator = delimiter,
+} = {}) {
+  const isWin = platform === 'win32';
+  const name = isWin ? 'git.exe' : 'git';
+  const fixed = isWin ? FIXED_DIRS.win32 : FIXED_DIRS.posix;
+  const fromPath = pathEnv
+    .split(separator)
+    .filter((dir) => dir !== '' && isAbsolute(dir));
+  for (const dir of [...fixed, ...fromPath]) {
+    const candidate = join(dir, name);
+    if (exists(candidate)) return candidate;
   }
-  throw new Error('git executable not found');
+  return null;
+}
+
+// Resolve the git executable once to an absolute path.
+export function gitExecutable() {
+  cached ??= resolveGit();
+  if (cached === null) throw new Error('git executable not found');
+  return cached;
 }
