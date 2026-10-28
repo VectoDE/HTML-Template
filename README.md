@@ -28,7 +28,7 @@ npm run lint
 
 ## Contributing and security
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before you open a pull request. Commits need a sign-off (`git commit -s`). Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report vulnerabilities privately, as [SECURITY.md](SECURITY.md) describes.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before you open a pull request. Commits need a sign-off (`git commit -s`). Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Decisions and roles are described in [GOVERNANCE.md](GOVERNANCE.md). Report vulnerabilities privately, as [SECURITY.md](SECURITY.md) describes.
 
 ## License
 

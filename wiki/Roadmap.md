@@ -10,6 +10,10 @@ The rebuild runs in seven stages. Each stage ends with a signed pre-release. Onc
 | 6     | Full quality pass, and the maintainer's review of the exclusion list for the coverage check.                                                                        | beta            |
 | 7     | The `1.0.0` release.                                                                                                                                                | `1.0.0`         |
 
+## After 1.0.0
+
+Versions follow conventional commits, as described in [[Release process]]. New platform features are added as browsers ship them.
+
 ## Where to follow the work
 
 Progress is tracked on the GitHub project linked to the repository. Each stage and each batch of topics has an issue. Ideas and questions go to the discussions.
