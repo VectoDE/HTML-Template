@@ -33,7 +33,11 @@ Prettier is currently the only dev dependency. It formats Markdown, YAML, JSON, 
 
 ## Commits
 
-Use [conventional commits](https://www.conventionalcommits.org/): `type: short summary`, for example `fix: correct the baseline status of :has()`. Common types are `feat`, `fix`, `docs`, `test`, `refactor`, `build` and `ci`. Use the imperative mood and keep the first line short. End the message with a reference to the issue it belongs to:
+Use [conventional commits](https://www.conventionalcommits.org/): `type: short summary` or `type(scope): short summary`, for example `fix: correct the baseline status of :has()`. Common types are `feat`, `fix`, `perf`, `docs`, `test`, `refactor`, `build` and `ci`. Use the imperative mood and keep the first line short.
+
+The type matters because the release notes are generated from the commits. `feat` goes under Features, `fix` and `perf` under Fixes, and every other type under Other. After 1.0.0 the type also decides the next version: `feat` raises the minor version, `fix` and `perf` the patch version. A breaking change is marked with `!` after the type, as in `feat!: drop the old URLs`, or with a `BREAKING CHANGE:` footer, and raises the major version. The [Release process](https://github.com/VectoDE/HTML-Template/wiki/Release-process) page has the details.
+
+End the message with a reference to the issue it belongs to:
 
 ```text
 docs: fix the browser support note for anchor positioning

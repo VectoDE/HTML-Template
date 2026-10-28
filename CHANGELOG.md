@@ -1,18 +1,3 @@
 # Changelog
 
-All notable changes to this project are documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-## [1.0.0-alpha.1] - YYYY-MM-DD
-
-### Added
-
-- Repository skeleton and guard rails for the 1.0 rebuild.
-
-### Removed
-
-- The old single-page template (`index.html`, `styles.css`).
+Release notes live in [GitHub Releases](https://github.com/VectoDE/HTML-Template/releases). Each release generates them from the conventional commits since the previous release, grouped into Features, Fixes and Other. The [Release process](https://github.com/VectoDE/HTML-Template/wiki/Release-process) page explains how.
