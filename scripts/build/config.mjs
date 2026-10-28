@@ -90,3 +90,37 @@ export const BROWSER_LABELS = Object.freeze({
   safari: 'Safari',
   safari_ios: 'Safari on iOS',
 });
+
+// Which browser-compat-data keys count for coverage (spec §8.4, plan calls 5
+// and 6). Keys `depth` segments below `prefix` are units (depth defaults to
+// 1). Feature units need a demo; table units are claimed by a topic's
+// `tables:` list. Every http.<group>.<name> counts, so a new http group is
+// picked up without a new rule. Of webassembly only the JavaScript API counts.
+const rule = (prefix, level, depth) =>
+  Object.freeze(
+    depth === undefined ? { prefix, level } : { prefix, level, depth },
+  );
+
+export const UNIT_RULES = Object.freeze([
+  rule('html.elements', 'feature'),
+  rule('css.properties', 'feature'),
+  rule('css.at-rules', 'feature'),
+  rule('css.selectors', 'feature'),
+  rule('css.types', 'feature'),
+  rule('api', 'feature'),
+  rule('javascript.builtins', 'feature'),
+  rule('svg.elements', 'feature'),
+  rule('mathml.elements', 'feature'),
+  rule('html.global_attributes', 'table'),
+  rule('svg.global_attributes', 'table'),
+  rule('mathml.global_attributes', 'table'),
+  rule('mathml.attribute_values', 'table'),
+  rule('javascript.classes', 'table'),
+  rule('javascript.functions', 'table'),
+  rule('javascript.grammar', 'table'),
+  rule('javascript.operators', 'table'),
+  rule('javascript.regular_expressions', 'table'),
+  rule('javascript.statements', 'table'),
+  rule('http', 'table', 2),
+  rule('webassembly.api', 'table'),
+]);

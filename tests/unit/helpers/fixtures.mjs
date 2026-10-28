@@ -105,6 +105,8 @@ export function miniBcd() {
         safari_ios: { version_added: false },
       }),
       NoIos: compat(noIos),
+      // A unit without __compat of its own, only children (3 exist in BCD).
+      Holder: { method: compat(everywhere('50')) },
     },
   };
 }

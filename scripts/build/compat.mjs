@@ -11,7 +11,7 @@ const isObject = (value) =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 // Plain code-unit order, the same on every machine.
-function byText(x, y) {
+export function byText(x, y) {
   if (x < y) return -1;
   return x > y ? 1 : 0;
 }
@@ -141,6 +141,15 @@ function specList(value) {
   return Array.isArray(value) ? [...value] : [value];
 }
 
+// The status flags a reference row shows, false when the data omits them.
+export function statusOf(compat) {
+  return {
+    experimental: compat?.status?.experimental ?? false,
+    deprecated: compat?.status?.deprecated ?? false,
+    standard: compat?.status?.standard_track ?? false,
+  };
+}
+
 export function resolveKey(key, index, baseline) {
   const node = index.get(key);
   if (!node) return null;
@@ -150,11 +159,7 @@ export function resolveKey(key, index, baseline) {
     key,
     mdn: compat?.mdn_url ?? null,
     spec: specList(compat?.spec_url),
-    status: {
-      experimental: compat?.status?.experimental ?? false,
-      deprecated: compat?.status?.deprecated ?? false,
-      standard: compat?.status?.standard_track ?? false,
-    },
+    status: statusOf(compat),
     support: compat ? extractSupport(compat) : null,
     baseline: entry
       ? {
