@@ -131,6 +131,28 @@ function readFence(lines, start, file, firstLine) {
   throw new ContentError(file, firstLine + start, 'unclosed code fence');
 }
 
+function renderHeading(trimmed, level, file, line) {
+  if (level === 1) {
+    throw new ContentError(
+      file,
+      line,
+      'h1 is not allowed, the page owns the h1',
+    );
+  }
+  if (level > 4) {
+    throw new ContentError(file, line, 'headings go from ## to ####');
+  }
+  const inner = renderInline(trimmed.slice(level + 1), file, line);
+  return `<h${level}>${inner}</h${level}>`;
+}
+
+// Returns { tag, text } for a list line, or null.
+function listLine(trimmed) {
+  if (trimmed.startsWith('- ')) return { tag: 'ul', text: trimmed.slice(2) };
+  const ordered = orderedPrefix(trimmed);
+  return ordered > 0 ? { tag: 'ol', text: trimmed.slice(ordered) } : null;
+}
+
 export function renderMarkdown(text, file, firstLine = 1) {
   const lines = text.replaceAll('\r\n', '\n').split('\n');
   const blocks = [];
@@ -178,26 +200,14 @@ export function renderMarkdown(text, file, firstLine = 1) {
     }
     const level = headingLevel(trimmed);
     if (level > 0) {
-      if (level === 1) {
-        throw new ContentError(
-          file,
-          line,
-          'h1 is not allowed, the page owns the h1',
-        );
-      }
-      if (level > 4) {
-        throw new ContentError(file, line, 'headings go from ## to ####');
-      }
+      const html = renderHeading(trimmed, level, file, line);
       flush();
-      const inner = renderInline(trimmed.slice(level + 1), file, line);
-      blocks.push(`<h${level}>${inner}</h${level}>`);
+      blocks.push(html);
       continue;
     }
-    const ordered = orderedPrefix(trimmed);
-    if (trimmed.startsWith('- ')) {
-      addItem('ul', renderInline(trimmed.slice(2), file, line));
-    } else if (ordered > 0) {
-      addItem('ol', renderInline(trimmed.slice(ordered), file, line));
+    const item = listLine(trimmed);
+    if (item) {
+      addItem(item.tag, renderInline(item.text, file, line));
     } else {
       if (list) flush();
       paragraph.push(renderInline(trimmed, file, line));

@@ -12,7 +12,7 @@ export class ContentError extends Error {
 }
 
 const MARKER = '---';
-const TAB = String.fromCharCode(9);
+const TAB = '	';
 
 function isDigit(ch) {
   return ch >= '0' && ch <= '9';
@@ -82,48 +82,60 @@ function parseBlockItems(lines, start, file, firstLine) {
   return { items, next: i };
 }
 
+function parseEntry(lines, i, file, firstLine) {
+  const line = firstLine + i;
+  const text = lines[i];
+  const colon = text.indexOf(':');
+  const key = colon === -1 ? '' : text.slice(0, colon).trim();
+  if (key === '') {
+    throw new ContentError(file, line, 'expected "key: value"');
+  }
+  const value = text.slice(colon + 1).trim();
+  if (value === '') {
+    const { items, next } = parseBlockItems(lines, i + 1, file, firstLine);
+    if (items.length === 0) {
+      throw new ContentError(file, line, `key "${key}" has no value`);
+    }
+    return { key, value: items, next };
+  }
+  const parsed = value.startsWith('[')
+    ? parseFlowList(value, file, line)
+    : parseScalar(value, file, line);
+  return { key, value: parsed, next: i + 1 };
+}
+
+function checkLine(text, file, line) {
+  if (text.includes(TAB)) {
+    throw new ContentError(file, line, 'tabs are not allowed, use spaces');
+  }
+  if (text.startsWith(' ') && text.trim() !== '') {
+    throw new ContentError(
+      file,
+      line,
+      'unexpected indentation, nested maps are not supported',
+    );
+  }
+}
+
 function parseBlock(lines, file, firstLine) {
   const data = {};
   let i = 0;
   while (i < lines.length) {
-    const line = firstLine + i;
-    const text = lines[i];
-    if (text.includes('\t')) {
-      throw new ContentError(file, line, 'tabs are not allowed, use spaces');
-    }
-    if (text.trim() === '') {
+    checkLine(lines[i], file, firstLine + i);
+    if (lines[i].trim() === '') {
       i++;
       continue;
     }
-    if (text.startsWith(' ')) {
+    const entry = parseEntry(lines, i, file, firstLine);
+    if (Object.hasOwn(data, entry.key)) {
       throw new ContentError(
         file,
-        line,
-        'unexpected indentation, nested maps are not supported',
+        firstLine + i,
+        `duplicate key "${entry.key}"`,
       );
     }
-    const colon = text.indexOf(':');
-    const key = colon === -1 ? '' : text.slice(0, colon).trim();
-    if (key === '') {
-      throw new ContentError(file, line, 'expected "key: value"');
-    }
-    if (Object.hasOwn(data, key)) {
-      throw new ContentError(file, line, `duplicate key "${key}"`);
-    }
-    const value = text.slice(colon + 1).trim();
-    if (value === '') {
-      const { items, next } = parseBlockItems(lines, i + 1, file, firstLine);
-      if (items.length === 0) {
-        throw new ContentError(file, line, `key "${key}" has no value`);
-      }
-      data[key] = items;
-      i = next;
-      continue;
-    }
-    data[key] = value.startsWith('[')
-      ? parseFlowList(value, file, line)
-      : parseScalar(value, file, line);
-    i++;
+    data[entry.key] = entry.value;
+    i = entry.next;
   }
   return data;
 }
