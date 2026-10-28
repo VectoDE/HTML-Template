@@ -264,3 +264,40 @@ test('renderHomePage escapes nav text and uses defaults', () => {
   assert.ok(html.includes('1 demo<'));
   assert.ok(html.includes('frame-src https://html-template-preview.pages.dev'));
 });
+
+test('renderTopicPage refuses data that belongs to another topic', () => {
+  const topic = makeTopic();
+  const { data } = buildTopicData(topic, { index, baseline, table: [] });
+  const wrong = [
+    { ...data, url: '/HTML-Template/css/grid/' },
+    { ...data, url: topic.url },
+    { ...data, category: 'css' },
+    { ...data, demos: data.demos.slice(1) },
+    { ...data, demos: [data.demos[1], data.demos[0]] },
+  ];
+  for (const other of wrong) {
+    assert.throws(
+      () => renderTopicPage(topic, other, { csp }),
+      /does not belong/,
+    );
+  }
+});
+
+test('renderTopicPage requires https:// spec and MDN links', () => {
+  for (const extra of [
+    { spec: ['javascript:alert(1)'] },
+    { spec: ['http://x.test/'] },
+    { mdn: 'data:text/html,x' },
+    { mdn: '//x.test/' },
+  ]) {
+    assert.throws(
+      () => page(makeTopic(), extra),
+      /must start with https:\/\//,
+      JSON.stringify(extra),
+    );
+  }
+});
+
+test('main can take focus from the skip link', () => {
+  assert.ok(page().includes('<main id="main" tabindex="-1">'));
+});

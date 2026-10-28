@@ -25,6 +25,14 @@ const DESCRIPTION = 'An interactive reference for HTML, CSS and JavaScript.';
 
 const link = (href, text) =>
   `<a href="${escapeHtml(href)}">${escapeHtml(text)}</a>`;
+
+// Spec and MDN links leave the site, so only https:// is accepted.
+function externalLink(href, text) {
+  if (typeof href !== 'string' || !href.startsWith('https://')) {
+    throw new TypeError(`link "${href}" must start with https://`);
+  }
+  return link(href, text);
+}
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 // --- labels ---------------------------------------------------------------
@@ -89,7 +97,7 @@ function documentHtml({ site, csp, title, description, path, main }) {
     '<body>',
     '<a href="#main">Skip to content</a>',
     `<header>${link(pageUrl('/', site), site.name)}</header>`,
-    '<main id="main">',
+    '<main id="main" tabindex="-1">',
     main,
     '</main>',
     '</body>',
@@ -122,7 +130,7 @@ function specPlate(topic, data) {
   const iface = data.interface
     ? `<code>${escapeHtml(data.interface)}</code>`
     : 'None';
-  const specs = data.spec.map((url) => link(url, url)).join(', ');
+  const specs = data.spec.map((url) => externalLink(url, url)).join(', ');
   return [
     '<dl class="spec-plate">',
     plateRow('Topic', escapeHtml(`${data.number}. ${topic.title}`)),
@@ -131,7 +139,7 @@ function specPlate(topic, data) {
     plateRow('Permission', escapeHtml(permissionText(data.permissions))),
     plateRow('Demos', String(topic.demos.length)),
     plateRow('Spec', specs),
-    data.mdn ? plateRow('MDN', link(data.mdn, 'MDN Web Docs')) : '',
+    data.mdn ? plateRow('MDN', externalLink(data.mdn, 'MDN Web Docs')) : '',
     '</dl>',
   ].join('');
 }
@@ -207,7 +215,23 @@ function referenceTable(topic, rows) {
   ].join('\n');
 }
 
+const demoIds = (demos) => demos.map((demo) => demo.id).join(',');
+
+// The data must come from buildTopicData for this very topic.
+function checkPair(topic, data, site) {
+  const same =
+    data.url === pageUrl(topic.url, site) &&
+    data.category === topic.category &&
+    demoIds(data.demos) === demoIds(topic.demos);
+  if (!same) {
+    throw new Error(
+      `topic data for ${data.url} does not belong to ${topic.url}`,
+    );
+  }
+}
+
 export function renderTopicPage(topic, data, { site = SITE, csp } = {}) {
+  checkPair(topic, data, site);
   const main = [
     breadcrumb(topic, site),
     `<h1>${escapeHtml(topic.title)}</h1>`,
@@ -234,18 +258,19 @@ export function renderTopicPage(topic, data, { site = SITE, csp } = {}) {
 
 // --- home page ------------------------------------------------------------
 
-function topicItem(topic, site) {
+// Nav URLs already carry the site base.
+function topicItem(topic) {
   const text = `${topic.number}. ${topic.title}`;
   const demos = plural(topic.demos, 'demo');
-  return `<li>${link(pageUrl(topic.url, site), text)} <span class="demo-count">${demos}</span></li>`;
+  return `<li>${link(topic.url, text)} <span class="demo-count">${demos}</span></li>`;
 }
 
-function categorySection(category, site) {
+function categorySection(category) {
   const heading = `category-${category.id}`;
   const list =
     category.topics.length === 0
       ? '<p>No topics yet.</p>'
-      : `<ul>${category.topics.map((t) => topicItem(t, site)).join('')}</ul>`;
+      : `<ul>${category.topics.map(topicItem).join('')}</ul>`;
   return [
     `<section aria-labelledby="${escapeHtml(heading)}">`,
     `<h2 id="${escapeHtml(heading)}">${escapeHtml(category.label)} <span class="count">(${category.count})</span></h2>`,
@@ -258,7 +283,7 @@ export function renderHomePage(nav, { site = SITE, csp } = {}) {
   const main = [
     `<h1>${escapeHtml(site.name)}</h1>`,
     `<p class="lede">${escapeHtml(DESCRIPTION)}</p>`,
-    ...nav.categories.map((c) => categorySection(c, site)),
+    ...nav.categories.map(categorySection),
   ].join('\n');
   return documentHtml({
     site,

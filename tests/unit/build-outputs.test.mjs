@@ -43,7 +43,7 @@ test('buildTopicData holds the summary, the demos and the table', () => {
     'demos',
     'table',
   ]);
-  assert.equal(data.url, '/html/dialog/');
+  assert.equal(data.url, '/HTML-Template/html/dialog/');
   assert.equal(data.category, 'html');
   assert.deepEqual(data.spec, topic.spec);
   assert.deepEqual(data.permissions, ['camera', 'fullscreen']);
@@ -131,7 +131,7 @@ test('buildNav counts topics and demos, sorted by number', () => {
     slug: 'dialog',
     title: 'Dialog',
     number: 1,
-    url: '/html/dialog/',
+    url: '/HTML-Template/html/dialog/',
     demos: 2,
   });
   assert.equal(html.topics[1].slug, 'popover');
@@ -149,10 +149,10 @@ test('buildSearchIndex has the topic, its demos and the features it covers', () 
   assert.deepEqual(
     entries.map((e) => [e.type, e.url, e.title]),
     [
-      ['demo', '/html/dialog/#demo-1', 'Demo 1'],
-      ['demo', '/html/dialog/#demo-2', 'Demo 2'],
-      ['feature', '/html/dialog/#reference', 'dialog'],
-      ['topic', '/html/dialog/', 'Dialog'],
+      ['demo', '/HTML-Template/html/dialog/#demo-1', 'Demo 1'],
+      ['demo', '/HTML-Template/html/dialog/#demo-2', 'Demo 2'],
+      ['feature', '/HTML-Template/html/dialog/#reference', 'dialog'],
+      ['topic', '/HTML-Template/html/dialog/', 'Dialog'],
     ],
   );
   for (const entry of entries) {
@@ -231,10 +231,10 @@ test('buildPrecache lists every file but itself, as site URLs', () => {
   ]);
   const { version, urls } = buildPrecache(files);
   assert.deepEqual(urls, [
-    '/',
-    '/data/nav.json',
-    '/html/dialog/',
-    '/sitemap.xml',
+    '/HTML-Template/',
+    '/HTML-Template/data/nav.json',
+    '/HTML-Template/html/dialog/',
+    '/HTML-Template/sitemap.xml',
   ]);
   assert.match(version, /^[0-9a-f]{16}$/);
 });
@@ -276,4 +276,44 @@ test('buildPrecache treats backslash and slash paths alike', () => {
   const posix = new Map([['html/dialog/index.html', 'x']]);
   const win = new Map([['html\\dialog\\index.html', 'x']]);
   assert.deepEqual(buildPrecache(win), buildPrecache(posix));
+});
+
+test('every emitted URL carries the site base', () => {
+  const topic = makeTopic();
+  const table = tableOf(topic);
+  const { data } = buildTopicData(topic, { index, baseline, table });
+  const nav = buildNav([topic]);
+  const search = buildSearchIndex([topic], new Map([[topic.url, table]]));
+  const precache = buildPrecache(
+    new Map([
+      ['index.html', 'a'],
+      ['html/dialog/index.html', 'b'],
+      ['data/nav.json', 'c'],
+    ]),
+  );
+  const urls = [
+    data.url,
+    ...nav.categories.flatMap((c) => c.topics.map((t) => t.url)),
+    ...search.map((e) => e.url),
+    ...precache.urls,
+  ];
+  assert.ok(urls.length > 8);
+  for (const url of urls) assert.ok(url.startsWith(SITE.base), url);
+});
+
+test('outputs take another site base when one is passed', () => {
+  const site = { ...SITE, base: '/' };
+  const topic = makeTopic();
+  const { data } = buildTopicData(topic, { index, baseline, table: [], site });
+  assert.equal(data.url, '/html/dialog/');
+  assert.equal(
+    buildNav([topic], { site }).categories[0].topics[0].url,
+    '/html/dialog/',
+  );
+  const search = buildSearchIndex([topic], new Map(), { site });
+  assert.ok(search.every((e) => e.url.startsWith('/html/dialog/')));
+  assert.deepEqual(
+    buildPrecache(new Map([['index.html', 'x']]), { site }).urls,
+    ['/'],
+  );
 });

@@ -164,6 +164,17 @@ function readFence(lines, start, file, firstLine) {
   throw new ContentError(file, firstLine + start, 'unclosed code fence');
 }
 
+// The page owns the h1, so the body starts at h2 and never skips a level.
+function checkLevelStep(level, last, file, line) {
+  if (level > last + 1) {
+    throw new ContentError(
+      file,
+      line,
+      `heading h${level} after h${last} skips a level`,
+    );
+  }
+}
+
 function renderHeading(trimmed, level, file, line) {
   if (level === 1) {
     throw new ContentError(
@@ -191,6 +202,7 @@ export function renderMarkdown(text, file, firstLine = 1) {
   const blocks = [];
   let paragraph = [];
   let list = null;
+  let lastLevel = 1;
 
   const flush = () => {
     if (paragraph.length > 0) {
@@ -234,6 +246,8 @@ export function renderMarkdown(text, file, firstLine = 1) {
     const level = headingLevel(trimmed);
     if (level > 0) {
       const html = renderHeading(trimmed, level, file, line);
+      checkLevelStep(level, lastLevel, file, line);
+      lastLevel = level;
       flush();
       blocks.push(html);
       continue;

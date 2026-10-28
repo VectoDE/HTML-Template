@@ -102,6 +102,8 @@ export function hashInline(html) {
       const element = readElement(html, lower, at, tag);
       if (element === null) break;
       if (tag === 'style') found.styles.push(sha256(element.body));
+      // A data block (type="application/json") never runs, so its hash is
+      // not needed; it is hashed anyway because that is harmless.
       else if (!element.hasSrc) found.scripts.push(sha256(element.body));
       next = element.next;
     }

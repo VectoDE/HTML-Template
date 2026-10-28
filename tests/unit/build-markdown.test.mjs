@@ -23,8 +23,8 @@ test('emphasis', () => {
 
 test('headings two to four', () => {
   assert.equal(md('## When'), '<h2>When</h2>');
-  assert.equal(md('### A'), '<h3>A</h3>');
-  assert.equal(md('#### B'), '<h4>B</h4>');
+  assert.equal(md('## A\n### B'), '<h2>A</h2>\n<h3>B</h3>');
+  assert.equal(md('## A\n### B\n#### C\n## D').split('\n').length, 4);
 });
 
 test('h1 and deeper headings are errors', () => {
@@ -154,4 +154,18 @@ test('a link inside a link label is an error', () => {
     () => md('[a [b](https://x.test) c](https://y.test)'),
     (e) => e instanceof ContentError && /inside a link/.test(e.message),
   );
+});
+
+test('headings may not skip a level', () => {
+  assert.throws(
+    () => md('## A\n\ntext\n\n#### C', 10),
+    (error) => {
+      assert.ok(error instanceof ContentError);
+      assert.match(error.message, /^t\.md:14 /);
+      assert.match(error.message, /h4 after h2/);
+      return true;
+    },
+  );
+  // The page owns the h1, so the body starts at h2.
+  assert.throws(() => md('### A'), /h3 after h1/);
 });

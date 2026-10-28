@@ -1,10 +1,11 @@
 // The data files the shell reads: per-topic compat JSON, navigation, search
-// index, sitemap and the service worker's precache list. URLs in the data
-// are site-relative ("/html/dialog/"); pages add the base with pageUrl.
+// index, sitemap and the service worker's precache list. Every URL in them
+// carries the site base ("/HTML-Template/html/dialog/"), so it resolves
+// inside the site and the service worker scope. The sitemap is absolute.
 
 import { createHash } from 'node:crypto';
 import { byText, resolveKey, topicBaseline } from './compat.mjs';
-import { CATEGORIES, absoluteUrl } from './config.mjs';
+import { CATEGORIES, SITE, absoluteUrl, pageUrl } from './config.mjs';
 import { escapeHtml } from './markdown.mjs';
 
 const PRECACHE = 'precache.json';
@@ -35,14 +36,14 @@ function resolveDemo(demo, index, baseline, errors) {
 
 // The JSON written to data/compat/<category>/<slug>.json. Errors name the
 // demo file of every key the compat data does not know.
-export function buildTopicData(topic, { index, baseline, table }) {
+export function buildTopicData(topic, { index, baseline, table, site = SITE }) {
   const errors = [];
   const demos = topic.demos.map((demo) =>
     resolveDemo(demo, index, baseline, errors),
   );
   const resolved = demos.flatMap((demo) => demo.features);
   const data = {
-    url: topic.url,
+    url: pageUrl(topic.url, site),
     title: topic.title,
     number: topic.number,
     category: topic.category,
@@ -61,7 +62,7 @@ export function buildTopicData(topic, { index, baseline, table }) {
 
 const byNumber = (a, b) => a.number - b.number || byText(a.slug, b.slug);
 
-export function buildNav(topics) {
+export function buildNav(topics, { site = SITE } = {}) {
   return {
     categories: CATEGORIES.map(({ id, label }) => {
       const list = topics.filter((t) => t.category === id).toSorted(byNumber);
@@ -73,7 +74,7 @@ export function buildNav(topics) {
           slug: t.slug,
           title: t.title,
           number: t.number,
-          url: t.url,
+          url: pageUrl(t.url, site),
           demos: t.demos.length,
         })),
       };
@@ -101,37 +102,41 @@ function unitKeys(rows) {
   );
 }
 
-function topicEntries(topic, rows) {
+function topicEntries(topic, rows, site) {
+  const url = pageUrl(topic.url, site);
   const label = CATEGORIES.find((c) => c.id === topic.category)?.label;
   const base = { category: topic.category };
   return [
     {
       type: 'topic',
       title: topic.title,
-      url: topic.url,
+      url,
       ...base,
       terms: terms([topic.slug, topic.category, label, topic.interface]),
     },
     ...topic.demos.map((demo) => ({
       type: 'demo',
       title: demo.title,
-      url: `${topic.url}#${demo.id}`,
+      url: `${url}#${demo.id}`,
       ...base,
       terms: terms([demo.slug, ...demo.features]),
     })),
     ...unitKeys(rows).map((key) => ({
       type: 'feature',
       title: lastSegment(key),
-      url: topic.url + REFERENCE,
+      url: url + REFERENCE,
       ...base,
       terms: terms([key]),
     })),
   ];
 }
 
-export function buildSearchIndex(topics, tablesByTopic) {
+// tablesByTopic is keyed by the topic's own url ("/html/dialog/").
+export function buildSearchIndex(topics, tablesByTopic, { site = SITE } = {}) {
   return topics
-    .flatMap((topic) => topicEntries(topic, tablesByTopic.get(topic.url) ?? []))
+    .flatMap((topic) =>
+      topicEntries(topic, tablesByTopic.get(topic.url) ?? [], site),
+    )
     .toSorted(
       (a, b) =>
         byText(a.type, b.type) ||
@@ -157,13 +162,15 @@ export function buildSitemap(urls, site) {
 
 const hex = (data) => createHash('sha256').update(data).digest('hex');
 
-// "html/dialog/index.html" -> "/html/dialog/", "data/nav.json" stays a file.
-function siteUrl(path) {
-  if (path === 'index.html') return '/';
-  return path.endsWith('/index.html') ? `/${path.slice(0, -10)}` : `/${path}`;
+// "html/dialog/index.html" -> "/HTML-Template/html/dialog/"; other files
+// keep their name ("/HTML-Template/data/nav.json").
+function siteUrl(path, site) {
+  if (path === 'index.html') return pageUrl('/', site);
+  const page = path.endsWith('/index.html') ? path.slice(0, -10) : path;
+  return pageUrl(page, site);
 }
 
-export function buildPrecache(files) {
+export function buildPrecache(files, { site = SITE } = {}) {
   const entries = [...files]
     .map(([path, content]) => [toPosix(path), content])
     .filter(([path]) => path !== PRECACHE)
@@ -171,6 +178,6 @@ export function buildPrecache(files) {
   const lines = entries.map(([path, content]) => `${path}\0${hex(content)}`);
   return {
     version: hex(lines.join('\n')).slice(0, 16),
-    urls: entries.map(([path]) => siteUrl(path)).toSorted(byText),
+    urls: entries.map(([path]) => siteUrl(path, site)).toSorted(byText),
   };
 }
