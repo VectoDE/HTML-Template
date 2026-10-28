@@ -24,6 +24,7 @@
     "lint": "npm run format:check && npm run lint:js && npm run policy",
     "lint:js": "eslint . --max-warnings=0",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 \"tests/unit/**/*.test.mjs\"",
+    "build": "node scripts/build.mjs",
     "coverage": "node scripts/build/coverage.mjs",
     "coverage:update": "node scripts/build/coverage.mjs --update"
   },
