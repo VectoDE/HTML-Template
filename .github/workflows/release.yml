@@ -27,8 +27,9 @@ jobs:
       hashes: ${{ steps.hash.outputs.hashes }}
     steps:
       # A release starts from a tag push by the owner or from tag.yml, whose
-      # workflow_dispatch runs as github-actions[bot]. Actor and triggering
-      # actor must agree, so a re-run by someone else is refused as well.
+      # workflow_dispatch runs as github-actions[bot]. A re-run keeps the
+      # actor and changes the triggering actor, so the owner may re-run a
+      # bot-started release and nobody else may re-run anything.
       - name: Verify who started the release
         env:
           ACTOR: ${{ github.actor }}
@@ -41,6 +42,8 @@ jobs:
             echo "Release started by the owner $OWNER"
           elif [ "$ACTOR" = "$bot" ] && [ "$TRIGGERING_ACTOR" = "$bot" ] && [ "$EVENT" = "workflow_dispatch" ]; then
             echo "Release started by the tag workflow"
+          elif [ "$ACTOR" = "$bot" ] && [ "$TRIGGERING_ACTOR" = "$OWNER" ] && [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "Release of the tag workflow re-run by the owner $OWNER"
           else
             echo "::error title=Release refused::$EVENT by $ACTOR (triggered by $TRIGGERING_ACTOR) may not start a release. Only $OWNER or the tag workflow may."
             exit 1
@@ -63,11 +66,11 @@ jobs:
       - run: npm run lint
       - run: npm test
       # The tag carries the version. It is stamped into the built package.json
-      # only and never committed.
+      # and package-lock.json only and never committed.
       - name: Stamp the version
         env:
           VERSION: ${{ steps.version.outputs.version }}
-        run: npm pkg set version="$VERSION"
+        run: npm version "$VERSION" --no-git-tag-version --allow-same-version --ignore-scripts
       - name: Package source archive
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -76,7 +79,7 @@ jobs:
           stage="$RUNNER_TEMP/stage"
           mkdir -p dist "$stage"
           git archive --format=tar --prefix="${name}/" "$GITHUB_SHA" | tar -x -C "$stage"
-          cp package.json "$stage/${name}/package.json"
+          cp package.json package-lock.json "$stage/${name}/"
           mtime="$(git log -1 --format=%ct "$GITHUB_SHA")"
           tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="@${mtime}" \
             -C "$stage" -cf - "$name" | gzip -n > "dist/${name}.tar.gz"

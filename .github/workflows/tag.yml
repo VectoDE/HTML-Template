@@ -14,6 +14,9 @@ concurrency:
 
 jobs:
   tag:
+    # Cheap pre-filter so other issue closes skip the job. The guard step
+    # below checks both conditions again.
+    if: github.event.issue.state_reason == 'completed' && github.event.issue.user.login == github.repository_owner
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -67,6 +70,10 @@ jobs:
           failing="$(node scripts/release/guards.mjs runs "$RUNNER_TEMP/runs.json" "$sha")"
           if [ -n "$failing" ]; then
             skip "required workflows on main $sha did not succeed: $failing"
+          fi
+          tagged="$(git tag --points-at "$sha" --list 'v*' 2> /dev/null || true)"
+          if [ -n "$tagged" ]; then
+            skip "main $sha is already tagged as $(echo "$tagged" | tr '\n' ' ')"
           fi
           node scripts/release/next.mjs "$channel" > "$RUNNER_TEMP/next.txt"
           tag="$(sed -n 's/^tag=//p' "$RUNNER_TEMP/next.txt")"

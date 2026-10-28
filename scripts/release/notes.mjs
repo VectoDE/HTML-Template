@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { gitExecutable } from '../policy/git.mjs';
 import { parseCommit } from './commits.mjs';
@@ -7,6 +8,7 @@ import { compareSemver, versionsFromTags } from './semver.mjs';
 import { parseReleaseTag } from './version.mjs';
 
 const RECORD = '\x1e';
+const FULL_SHA = /^[0-9a-f]{40}$/;
 const FIELD = '\x1f';
 const GROUPS = [
   { title: 'Features', types: new Set(['feat']) },
@@ -14,14 +16,27 @@ const GROUPS = [
   { title: 'Other', types: null },
 ];
 
+// The last commit before the rebuild, from release-stages.json. The first
+// release starts its notes there instead of at the root. Null when unset.
+export function notesBase(config) {
+  const base = config?.notesBase;
+  if (base === undefined) return null;
+  if (typeof base !== 'string' || !FULL_SHA.test(base)) {
+    throw new Error('release-stages.json: notesBase must be a full commit sha');
+  }
+  return base;
+}
+
 // git log range from the previous v* tag in semver order to this tag. The
-// first tag has no previous one, so its range reaches back to the root.
-export function logRange(tags, tag) {
+// first tag has no previous one, so its range starts at `base`, or at the
+// root when there is no base.
+export function logRange(tags, tag, base = null) {
   const { version } = parseReleaseTag(tag);
   const older = versionsFromTags(tags)
     .filter((v) => compareSemver(v, version) < 0)
     .sort(compareSemver);
-  return older.length === 0 ? tag : `v${older.at(-1)}..${tag}`;
+  if (older.length > 0) return `v${older.at(-1)}..${tag}`;
+  return base === null ? tag : `${base}..${tag}`;
 }
 
 // Parses `git log --format=%H%x1f%B%x1e` output.
@@ -74,7 +89,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const wanted = process.argv[2] ?? '';
     const tag = tags.find((name) => name === wanted);
     if (tag === undefined) throw new Error(`Tag "${wanted}" does not exist`);
-    const range = logRange(tags, tag);
+    const config = JSON.parse(
+      readFileSync(
+        new URL('../../.github/release-stages.json', import.meta.url),
+        'utf8',
+      ),
+    );
+    const range = logRange(tags, tag, notesBase(config));
     const output = execFileSync(
       gitExecutable(),
       [

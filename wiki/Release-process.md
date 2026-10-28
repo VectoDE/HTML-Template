@@ -2,13 +2,13 @@ Releases are tagged, built, signed and published by two workflows. `tag` creates
 
 ## How a release happens
 
-1. The owner closes a stage issue as completed. The stage issues and their release channels are listed in `.github/release-stages.json`.
-2. The `tag` workflow runs its guards. The issue must be closed as completed, listed in `release-stages.json` and opened by the repository owner. The person who closed it needs the admin or maintain role. For the head commit of `main`, the newest push runs of `.github/workflows/ci.yml` and `.github/workflows/codeql.yml` must have completed with success, and the new tag must not exist yet. The workflows are matched by file path, so a run of another workflow with the same job names does not count. If a guard fails, the workflow ends with a notice and creates nothing.
+1. The owner closes a stage issue as completed. The stage issues and their release channels are listed in `.github/release-stages.json`. Wait until `ci` and `codeql` are green on `main` before closing the issue, and close stage issues one at a time, each after the previous release has its tag. GitHub keeps only one waiting run of the `tag` workflow, so a third close during a running one is dropped.
+2. The `tag` workflow runs its guards. The issue must be closed as completed, listed in `release-stages.json` and opened by the repository owner. The person who closed it needs the admin or maintain role. For the head commit of `main`, the newest push runs of `.github/workflows/ci.yml` and `.github/workflows/codeql.yml` must have completed with success, the commit must not carry a `v*` tag already, and the new tag must not exist yet. The workflows are matched by file path, so a run of another workflow with the same job names does not count. If a guard fails, the workflow ends with a notice and creates nothing. When that happened because the checks were not finished yet, reopen the issue and close it again once they are green.
 3. The workflow works out the next version, creates the tag `v<version>` on the head commit of `main` and starts the `release` workflow on that tag.
-4. The `build` job first checks who started the run. A release may come from a tag that the repository owner pushed, or from a `workflow_dispatch` by the `tag` workflow, which runs as `github-actions[bot]`. The actor and the triggering actor must both match, so a re-run by anyone else stops there as well. The job then checks that the tagged commit is on `main`, runs lint and tests, stamps the version into the built `package.json`, packages the archive, creates the SBOM and writes the release notes. The `provenance` and `sign` jobs run next. The `publish` job then creates the GitHub release in the `release` environment, which accepts only tags that match `v*`. There is no manual approval step.
+4. The `build` job first checks who started the run. A release may come from a tag that the repository owner pushed, or from a `workflow_dispatch` by the `tag` workflow, which runs as `github-actions[bot]`. A re-run keeps the original actor and records who re-ran it as the triggering actor. The owner may re-run a release that the `tag` workflow started, and a re-run by anyone else stops here. The job then checks that the tagged commit is on `main`, runs lint and tests, stamps the version into the built `package.json` and `package-lock.json`, packages the archive, creates the SBOM and writes the release notes. The `provenance` and `sign` jobs run next. The `publish` job then creates the GitHub release in the `release` environment, which accepts only tags that match `v*`. There is no manual approval step.
 5. The workflow comments on the closed issue with the tag and a link to the release runs. Verify the release with the commands below before announcing it.
 
-The tag is the only place the version lives. `package.json` in the repository keeps `0.0.0-development`, and the stamped version exists only inside the release archive.
+The tag is the only place the version lives. `package.json` and `package-lock.json` in the repository keep `0.0.0-development`, and the stamped version exists only inside the release archive.
 
 ## Versions
 
@@ -26,13 +26,13 @@ After 1.0.0 the version will come from the commit types: a breaking change raise
 
 ## Release notes
 
-The notes are generated from the commits between the previous `v*` tag and the new one. The first release takes every commit back to the root. Commits are grouped into Features (`feat`), Fixes (`fix` and `perf`) and Other, and breaking changes are marked. A range without commits gives the single line "No changes." That is why the commit type matters. [Contributing](https://github.com/VectoDE/HTML-Template/blob/main/CONTRIBUTING.md#commits) lists the types.
+The notes are generated from the commits between the previous `v*` tag and the new one. The first release starts at `notesBase` in `release-stages.json`, the last commit before the rebuild, so the old template history stays out. Commits are grouped into Features (`feat`), Fixes (`fix` and `perf`) and Other, and breaking changes are marked. A range without commits gives the single line "No changes." That is why the commit type matters. Pull requests are squash-merged, so the pull request title becomes the commit on `main` and is the line that ends up in the notes. [Contributing](https://github.com/VectoDE/HTML-Template/blob/main/CONTRIBUTING.md#commits) lists the types.
 
 ## What a release contains
 
 For version `<v>`:
 
-- `html-template-<v>.tar.gz`, the source archive of the tagged commit with the version stamped into `package.json`,
+- `html-template-<v>.tar.gz`, the source archive of the tagged commit with the version stamped into `package.json` and `package-lock.json`,
 - `html-template-<v>.spdx.json`, the SBOM in SPDX format,
 - a `.sigstore.json` bundle for each of those two files, made with Sigstore keyless signing,
 - `html-template-<v>.intoto.jsonl`, the SLSA provenance.
@@ -73,3 +73,5 @@ If the `tag` workflow cannot run, the owner can push a tag by hand:
 1. Make sure `main` is green.
 2. Pick the next version by the rules above and create the tag `v<version>` on the head commit of `main`.
 3. Push the tag. The push starts the `release` workflow, and everything from step 4 above runs as usual.
+
+If a release fails after its tag exists, the owner starts it again on the same tag. Either use "Re-run failed jobs" on the failed run, or run `gh workflow run release.yml --ref v<version>`, which is the same as choosing the tag under "Run workflow" in the Actions tab. Do not create a second tag for the same commit, because the `tag` workflow skips a commit that already has one.

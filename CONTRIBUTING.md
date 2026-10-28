@@ -37,6 +37,8 @@ Use [conventional commits](https://www.conventionalcommits.org/): `type: short s
 
 The type matters because the release notes are generated from the commits. `feat` goes under Features, `fix` and `perf` under Fixes, and every other type under Other. After 1.0.0 the type also decides the next version: `feat` raises the minor version, `fix` and `perf` the patch version. A breaking change is marked with `!` after the type, as in `feat!: drop the old URLs`, or with a `BREAKING CHANGE:` footer, and raises the major version. The [Release process](https://github.com/VectoDE/HTML-Template/wiki/Release-process) page has the details.
 
+Pull requests are squash-merged, so the pull request title becomes the commit on `main`. Only that title reaches the release notes and the version bump, and the commit types inside the pull request are lost. Give the title a conventional type, for example `feat(release): derive the next version from stage issues`.
+
 End the message with a reference to the issue it belongs to:
 
 ```text
