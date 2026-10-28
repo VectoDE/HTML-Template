@@ -12,7 +12,7 @@ export class ContentError extends Error {
 }
 
 const MARKER = '---';
-const TAB = '	';
+const TAB = '\t';
 
 function isDigit(ch) {
   return ch >= '0' && ch <= '9';

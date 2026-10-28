@@ -61,14 +61,47 @@ function readEm(text, at, file, line) {
   return { html: `<em>${inner}</em>`, next: end + 1 };
 }
 
+function hasWhitespace(text) {
+  for (const ch of text) if (ch === ' ' || ch === '	') return true;
+  return false;
+}
+
+function checkLinkParts(label, href, file, line) {
+  if (label.includes('[')) {
+    throw new ContentError(
+      file,
+      line,
+      'a link inside a link label is not allowed',
+    );
+  }
+  if (hasWhitespace(href)) {
+    throw new ContentError(
+      file,
+      line,
+      'link target must not contain whitespace (link titles are unsupported)',
+    );
+  }
+  if (href.includes('(')) {
+    throw new ContentError(
+      file,
+      line,
+      'parentheses inside a link target are unsupported',
+    );
+  }
+  checkHref(href, file, line);
+}
+
+// The target ends at the first ")", so parentheses inside hrefs are
+// unsupported and rejected instead of being cut off silently.
 function readLink(text, at, file, line) {
   const close = text.indexOf(']', at + 1);
   if (close === -1 || text[close + 1] !== '(') return null;
   const end = text.indexOf(')', close + 2);
   if (end === -1) return null;
   const href = text.slice(close + 2, end).trim();
-  checkHref(href, file, line);
-  const label = renderInline(text.slice(at + 1, close), file, line);
+  const rawLabel = text.slice(at + 1, close);
+  checkLinkParts(rawLabel, href, file, line);
+  const label = renderInline(rawLabel, file, line);
   return {
     html: `<a href="${escapeHtml(href)}">${label}</a>`,
     next: end + 1,

@@ -117,3 +117,10 @@ test('blank lines inside the block are ignored and empty body works', () => {
   assert.equal(r.body, '');
   assert.equal(r.bodyLine, 5);
 });
+
+test('a tab inside a block list item is rejected', () => {
+  assert.throws(
+    () => parseFrontMatter('---\nspec:\n  -\tx\n---\n', 't.md'),
+    (e) => /tabs are not allowed/.test(e.message),
+  );
+});

@@ -133,3 +133,25 @@ test('CRLF input renders like LF', () => {
 test('empty input renders nothing', () => {
   assert.equal(md(''), '');
 });
+
+test('link href with whitespace is an error and never leaks a title', () => {
+  assert.throws(
+    () => md('[a](https://x.test "title")'),
+    (e) => e instanceof ContentError && /whitespace/.test(e.message),
+  );
+  assert.throws(() => md('[a](https://x.test/a b)'), ContentError);
+});
+
+test('parentheses inside a link href are unsupported', () => {
+  assert.throws(
+    () => md('[a](https://x.test/f(x))'),
+    (e) => e instanceof ContentError && /parenthes/.test(e.message),
+  );
+});
+
+test('a link inside a link label is an error', () => {
+  assert.throws(
+    () => md('[a [b](https://x.test) c](https://y.test)'),
+    (e) => e instanceof ContentError && /inside a link/.test(e.message),
+  );
+});
