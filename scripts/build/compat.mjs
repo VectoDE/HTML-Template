@@ -10,6 +10,12 @@ const RANK = { false: 0, low: 1, high: 2 };
 const isObject = (value) =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+// Plain code-unit order, the same on every machine.
+function byText(x, y) {
+  if (x < y) return -1;
+  return x > y ? 1 : 0;
+}
+
 // --- index ----------------------------------------------------------------
 
 function childNames(node) {
@@ -30,7 +36,7 @@ export function indexCompat(bcd) {
     const names = childNames(node);
     index.set(key, {
       compat: node[COMPAT] ?? null,
-      children: names.map((name) => `${key}.${name}`).toSorted(),
+      children: names.map((name) => `${key}.${name}`).toSorted(byText),
     });
     for (const name of names) stack.push([`${key}.${name}`, node[name]]);
   }
@@ -121,7 +127,7 @@ function* featureEntries(id, feature) {
 // Features are visited by id, so a tie keeps the lowest id.
 export function indexBaseline(webFeatures) {
   const index = new Map();
-  for (const id of Object.keys(webFeatures.features).toSorted()) {
+  for (const id of Object.keys(webFeatures.features).toSorted(byText)) {
     const feature = webFeatures.features[id];
     if (feature.kind !== 'feature') continue;
     for (const [key, entry] of featureEntries(id, feature)) {
