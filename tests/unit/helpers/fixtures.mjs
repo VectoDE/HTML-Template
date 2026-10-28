@@ -74,6 +74,13 @@ export function miniBcd() {
         ...compat(everywhere('1')),
         css_files: compat(everywhere('1')),
       },
+      headers: {
+        'Content-Security-Policy': {
+          ...compat(everywhere('25')),
+          'script-src': compat(everywhere('25')),
+          'style-src': compat(everywhere('25')),
+        },
+      },
     },
     webassembly: { instructions: { i32: compat(everywhere('57')) } },
     css: {

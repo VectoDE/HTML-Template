@@ -19,6 +19,9 @@ const startsWith = (parts, prefix) => prefix.every((p, i) => parts[i] === p);
 // when it carries __compat (http.data-url, javascript.classes): nothing in
 // a counted namespace may drop out. That needs the index to see __compat.
 export function unitOf(key, index) {
+  if (typeof index?.get !== 'function') {
+    throw new TypeError('unitOf(key, index) needs the compat index');
+  }
   const parts = key.split('.');
   const rule = RULES.find((r) => startsWith(parts, r.parts));
   if (!rule) return null;
@@ -26,7 +29,7 @@ export function unitOf(key, index) {
   if (parts.length >= size) {
     return { unit: parts.slice(0, size).join('.'), level: rule.level };
   }
-  return index?.get(key)?.compat ? { unit: key, level: 'table' } : null;
+  return index.get(key)?.compat ? { unit: key, level: 'table' } : null;
 }
 
 // Every unit in the data, with or without its own __compat block.

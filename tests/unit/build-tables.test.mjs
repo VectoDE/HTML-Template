@@ -89,14 +89,14 @@ test('tableRootsFor widens feature-level demo keys to their unit', () => {
     ],
     ['javascript.statements.let', 'html.elements.dialog'],
   );
-  assert.deepEqual(tableRootsFor(t), [
+  assert.deepEqual(tableRootsFor(t, index), [
     'api.HTMLDialogElement',
     'html.elements.dialog',
     'html.global_attributes.inert',
     'javascript.statements.let',
     'manifests.name',
   ]);
-  assert.deepEqual(tableRootsFor(topic('/x/', [])), []);
+  assert.deepEqual(tableRootsFor(topic('/x/', []), index), []);
 });
 
 test('checkTables passes on the generated tables', () => {
@@ -108,7 +108,7 @@ test('checkTables passes on the generated tables', () => {
   const tables = new Map(
     topics.map((t) => [
       t.url,
-      referenceTable(tableRootsFor(t), index, excluded),
+      referenceTable(tableRootsFor(t, index), index, excluded),
     ]),
   );
   assert.deepEqual(checkTables(topics, tables, index, excluded), []);
@@ -122,7 +122,7 @@ test('checkTables passes on the generated tables', () => {
 test('checkTables fails when a row of the demo unit is dropped', () => {
   // The demo lists only closedby, yet the whole unit must be in the table.
   const topics = [topic('/html/dialog/', [['html.elements.dialog.closedby']])];
-  const full = referenceTable(tableRootsFor(topics[0]), index, none);
+  const full = referenceTable(tableRootsFor(topics[0], index), index, none);
   const tables = new Map([
     [
       '/html/dialog/',
@@ -132,6 +132,22 @@ test('checkTables fails when a row of the demo unit is dropped', () => {
   assert.deepEqual(checkTables(topics, tables, index, none), [
     '/html/dialog/: sub-entry html.elements.dialog.open missing from the reference table',
   ]);
+});
+
+test('checkTables fails when a row of a table-level unit is dropped', () => {
+  // tables: names one sub-key, yet the whole unit must be in the table.
+  const csp = 'http.headers.Content-Security-Policy';
+  const topics = [topic('/http/csp/', [], [`${csp}.script-src`])];
+  assert.deepEqual(tableRootsFor(topics[0], index), [csp]);
+  const full = referenceTable(tableRootsFor(topics[0], index), index, none);
+  assert.deepEqual(keys(full), [csp, `${csp}.script-src`, `${csp}.style-src`]);
+  const tables = new Map([['/http/csp/', full.slice(1, 2)]]);
+  assert.deepEqual(checkTables(topics, tables, index, none), [
+    `/http/csp/: sub-entry ${csp} missing from the reference table`,
+    `/http/csp/: sub-entry ${csp}.style-src missing from the reference table`,
+  ]);
+  tables.set('/http/csp/', full);
+  assert.deepEqual(checkTables(topics, tables, index, none), []);
 });
 
 test('checkTables accepts excluded rows and reports a missing table', () => {
@@ -155,8 +171,8 @@ test('two topics claiming one unit both list it', () => {
     topic('/a/', [['html.elements.dialog']]),
     topic('/b/', [['html.elements.dialog.open']]),
   ];
-  assert.deepEqual(tableRootsFor(topics[1]), ['html.elements.dialog']);
-  const full = referenceTable(tableRootsFor(topics[0]), index, none);
+  assert.deepEqual(tableRootsFor(topics[1], index), ['html.elements.dialog']);
+  const full = referenceTable(tableRootsFor(topics[0], index), index, none);
   const tables = new Map([
     ['/a/', full],
     ['/b/', full.filter((r) => r.key === 'html.elements.dialog.open')],

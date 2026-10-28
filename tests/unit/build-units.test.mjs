@@ -39,45 +39,47 @@ test('UNIT_RULES: one http rule at depth 2, the rest at depth 1', () => {
 });
 
 test('unitOf maps keys to their feature or table unit', () => {
-  assert.deepEqual(unitOf('css.properties.display.grid'), {
+  assert.deepEqual(unitOf('css.properties.display.grid', index), {
     unit: 'css.properties.display',
     level: 'feature',
   });
-  assert.deepEqual(unitOf('api.Element.closest'), {
+  assert.deepEqual(unitOf('api.Element.closest', index), {
     unit: 'api.Element',
     level: 'feature',
   });
-  assert.deepEqual(unitOf('api.Element'), {
+  assert.deepEqual(unitOf('api.Element', index), {
     unit: 'api.Element',
     level: 'feature',
   });
-  assert.deepEqual(unitOf('html.global_attributes.inert'), {
+  assert.deepEqual(unitOf('html.global_attributes.inert', index), {
     unit: 'html.global_attributes.inert',
     level: 'table',
   });
-  assert.deepEqual(unitOf('http.headers.Content-Security-Policy.script-src'), {
-    unit: 'http.headers.Content-Security-Policy',
-    level: 'table',
-  });
-  assert.deepEqual(unitOf('http.future-group.thing'), {
+  assert.deepEqual(
+    unitOf('http.headers.Content-Security-Policy.script-src', index),
+    {
+      unit: 'http.headers.Content-Security-Policy',
+      level: 'table',
+    },
+  );
+  assert.deepEqual(unitOf('http.future-group.thing', index), {
     unit: 'http.future-group.thing',
     level: 'table',
   });
-  assert.deepEqual(unitOf('webassembly.api.Memory.grow'), {
+  assert.deepEqual(unitOf('webassembly.api.Memory.grow', index), {
     unit: 'webassembly.api.Memory',
     level: 'table',
   });
 });
 
 test('unitOf returns null outside the counted namespaces', () => {
-  assert.equal(unitOf('webassembly.instructions.i32'), null);
-  assert.equal(unitOf('manifests.name'), null);
-  assert.equal(unitOf('http.headers'), null);
-  assert.equal(unitOf('http'), null);
-  assert.equal(unitOf('css.properties'), null);
-  assert.equal(unitOf('javascript.classes'), null);
-  assert.equal(unitOf('apiX.Element'), null);
-  assert.equal(unitOf(''), null);
+  assert.equal(unitOf('webassembly.instructions.i32', index), null);
+  assert.equal(unitOf('manifests.name', index), null);
+  assert.equal(unitOf('http.headers', index), null);
+  assert.equal(unitOf('http', index), null);
+  assert.equal(unitOf('css.properties', index), null);
+  assert.equal(unitOf('apiX.Element', index), null);
+  assert.equal(unitOf('', index), null);
 });
 
 test('listUnits is sorted and includes units without __compat', () => {
@@ -89,6 +91,7 @@ test('listUnits is sorted and includes units without __compat', () => {
     { unit: 'html.elements.dialog', level: 'feature' },
     { unit: 'http.data-url', level: 'table' },
     { unit: 'http.data-url.css_files', level: 'table' },
+    { unit: 'http.headers.Content-Security-Policy', level: 'table' },
     { unit: 'javascript.classes', level: 'table' },
     { unit: 'javascript.classes.private_class_fields', level: 'table' },
   ]);
@@ -105,8 +108,11 @@ test('a rule node with its own __compat is a table unit', () => {
     unitOf('javascript.classes.private_class_fields', index),
     table('javascript.classes.private_class_fields'),
   );
-  // Without the index, or without __compat, the node stays out of scope.
-  assert.equal(unitOf('javascript.classes'), null);
+  // Without __compat the node stays out of scope; the index is required.
+  assert.throws(() => unitOf('javascript.classes'), {
+    name: 'TypeError',
+    message: 'unitOf(key, index) needs the compat index',
+  });
   assert.equal(unitOf('html.elements', index), null);
   assert.equal(unitOf('http.nope', index), null);
   // Outside every rule nothing counts, __compat or not (plan call 6).
