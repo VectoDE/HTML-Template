@@ -1,0 +1,230 @@
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+
+// Writes { 'a/b.txt': 'text' } below dir, creating folders as needed.
+export async function writeTree(dir, files) {
+  await Promise.all(
+    Object.entries(files).map(async ([rel, text]) => {
+      const target = join(dir, rel);
+      await mkdir(dirname(target), { recursive: true });
+      await writeFile(target, text);
+    }),
+  );
+}
+
+const TRACKED = [
+  'chrome',
+  'chrome_android',
+  'edge',
+  'firefox',
+  'firefox_android',
+  'safari',
+  'safari_ios',
+];
+
+// One statement per tracked browser, each added in the given version.
+function everywhere(version, overrides = {}) {
+  const support = {};
+  for (const browser of TRACKED) support[browser] = { version_added: version };
+  return { ...support, ...overrides };
+}
+
+function compat(support, extra = {}) {
+  return {
+    __compat: {
+      mdn_url: 'https://developer.mozilla.org/docs/Web/Test',
+      spec_url: 'https://example.test/spec',
+      status: { experimental: false, deprecated: false, standard_track: true },
+      support,
+      ...extra,
+    },
+  };
+}
+
+// A hand-built slice of @mdn/browser-compat-data.
+export function miniBcd() {
+  const noIos = everywhere('10');
+  delete noIos.safari_ios;
+  return {
+    __meta: { version: '0.0.0-test' },
+    browsers: { chrome: { name: 'Chrome' } },
+    html: {
+      elements: {
+        dialog: {
+          ...compat(everywhere('37', { safari: { version_added: '15.4' } })),
+          closedby: compat(everywhere('134')),
+          open: compat(
+            everywhere('37', {
+              chrome: { version_added: '37', partial_implementation: true },
+            }),
+          ),
+        },
+      },
+    },
+    // Rule prefixes (or nodes above unit depth) with their own __compat,
+    // and a counted-namespace node outside every rule.
+    javascript: {
+      classes: {
+        ...compat(everywhere('49')),
+        private_class_fields: compat(everywhere('74')),
+      },
+    },
+    http: {
+      'data-url': {
+        ...compat(everywhere('1')),
+        css_files: compat(everywhere('1')),
+      },
+      headers: {
+        'Content-Security-Policy': {
+          ...compat(everywhere('25')),
+          'script-src': compat(everywhere('25')),
+          'style-src': compat(everywhere('25')),
+        },
+      },
+    },
+    webassembly: { instructions: { i32: compat(everywhere('57')) } },
+    css: {
+      properties: {
+        zoom: compat(
+          everywhere('1', {
+            chrome: [
+              { prefix: '-webkit-', version_added: '18' },
+              {
+                version_added: '30',
+                flags: [{ type: 'preference', name: 'zoom' }],
+              },
+              { version_added: '42' },
+            ],
+            edge: [{ prefix: '-webkit-', version_added: '18' }],
+            firefox: [
+              {
+                version_added: '55',
+                flags: [{ type: 'preference', name: 'zoom' }],
+              },
+            ],
+            firefox_android: { version_added: false },
+            safari: { version_added: 'preview' },
+          }),
+          {
+            spec_url: ['https://example.test/a', 'https://example.test/b'],
+            status: {
+              experimental: true,
+              deprecated: true,
+              standard_track: false,
+            },
+          },
+        ),
+      },
+    },
+    api: {
+      Old: compat({
+        chrome: [{ version_added: '20', version_removed: '60' }],
+        chrome_android: { version_added: false },
+        edge: { version_added: false },
+        firefox: { version_added: false },
+        firefox_android: { version_added: false },
+        safari: { version_added: '≤4', version_removed: '12' },
+        safari_ios: { version_added: false },
+      }),
+      NoIos: compat(noIos),
+      // A unit without __compat of its own, only children (3 exist in BCD).
+      Holder: { method: compat(everywhere('50')) },
+    },
+  };
+}
+
+// A hand-built slice of web-features/data.json.
+export function miniWebFeatures() {
+  return {
+    features: {
+      dialog: {
+        kind: 'feature',
+        compat_features: [
+          'html.elements.dialog',
+          'html.elements.dialog.closedby',
+          'html.elements.dialog.open',
+        ],
+        status: {
+          baseline: 'high',
+          baseline_low_date: '2022-03-14',
+          baseline_high_date: '2024-09-14',
+          by_compat_key: {
+            'html.elements.dialog.closedby': {
+              baseline: 'low',
+              baseline_low_date: '2025-05-01',
+            },
+          },
+        },
+      },
+      zoom: {
+        kind: 'feature',
+        compat_features: ['css.properties.zoom'],
+        status: {
+          baseline: 'high',
+          baseline_low_date: '≤2020-03-24',
+          baseline_high_date: '≤2022-09-24',
+        },
+      },
+      'no-baseline': {
+        kind: 'feature',
+        compat_features: ['api.NoIos'],
+        status: { baseline: false },
+      },
+      'old-name': {
+        kind: 'moved',
+        redirect_target: 'dialog',
+        compat_features: ['api.Old'],
+      },
+    },
+  };
+}
+
+function demo(n, overrides = {}) {
+  return {
+    title: `Demo ${n}`,
+    summary: `When to use demo ${n}.`,
+    a11y: null,
+    fallback: `Fallback ${n}.`,
+    features: ['html.elements.dialog'],
+    detect: "'HTMLDialogElement' in window",
+    runsIn: 'frame',
+    permissions: [],
+    code: { html: '<dialog>Hi</dialog>', css: '', js: '' },
+    n,
+    slug: `demo-${n}`,
+    id: `demo-${n}`,
+    file: `content/html/dialog/0${n}-demo-${n}.demo.html`,
+    ...overrides,
+  };
+}
+
+// A Topic as loadContent returns it: html/dialog with two demos.
+export function makeTopic(overrides = {}) {
+  return {
+    category: 'html',
+    slug: 'dialog',
+    url: '/html/dialog/',
+    title: 'Dialog',
+    number: 1,
+    lede: 'A modal or non-modal box.',
+    interface: 'HTMLDialogElement',
+    spec: ['https://html.spec.whatwg.org/multipage/interactive-elements.html'],
+    mdn: 'https://developer.mozilla.org/docs/Web/HTML/Element/dialog',
+    tables: [],
+    appendix: null,
+    bodyHtml: '<p>Body text.</p>',
+    demos: [
+      demo(1, {
+        a11y: 'Focus moves into the dialog.',
+        code: { html: '<dialog>Hi</dialog>', css: 'dialog{}', js: 'd()' },
+      }),
+      demo(2, {
+        features: ['html.elements.dialog.closedby'],
+        permissions: ['fullscreen', 'camera'],
+        runsIn: 'window',
+      }),
+    ],
+    file: 'content/html/dialog/topic.md',
+    ...overrides,
+  };
+}

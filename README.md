@@ -12,7 +12,7 @@ A topic page holds the explanation of a feature, its verified browser support, l
 
 ## Status
 
-The project is being rebuilt in seven stages. Stage 1 is under way: repository, CI, OpenSSF checks, the wiki and the release pipeline. There is no deployed site yet.
+The project is being rebuilt in seven stages. Stages 1 and 2 are done: the repository, CI, OpenSSF checks, the wiki and the release pipeline, then the build pipeline, the extraction of browser support data and the coverage check. Stage 3, the shell and the editor, is next. There is no deployed site yet.
 
 - [Roadmap](https://github.com/VectoDE/HTML-Template/wiki/Roadmap)
 - [Project board](https://github.com/users/VectoDE/projects/12)
@@ -25,7 +25,11 @@ You need Node.js 24 (pinned in `.nvmrc`).
 npm ci --ignore-scripts
 npm test
 npm run lint
+npm run build
+npm run coverage
 ```
+
+`npm run build` writes the static site to `dist/site`.
 
 ## Contributing and security
 

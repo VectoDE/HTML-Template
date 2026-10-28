@@ -23,11 +23,16 @@
     "test": "node --test \"tests/unit/**/*.test.mjs\"",
     "lint": "npm run format:check && npm run lint:js && npm run policy",
     "lint:js": "eslint . --max-warnings=0",
-    "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 \"tests/unit/**/*.test.mjs\""
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 \"tests/unit/**/*.test.mjs\"",
+    "build": "node scripts/build.mjs",
+    "coverage": "node scripts/build/coverage.mjs",
+    "coverage:update": "node scripts/build/coverage.mjs --update"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@mdn/browser-compat-data": "8.1.7",
     "eslint": "10.13.0",
-    "prettier": "3.9.10"
+    "prettier": "3.9.10",
+    "web-features": "3.44.0"
   }
 }
