@@ -1,6 +1,6 @@
 ## Why is there no site yet?
 
-The project is being rebuilt from scratch. Stage 1 sets up the repository, the checks and the release pipeline. The shell comes in stage 3 and the first topics in stage 5. See the [[Roadmap]].
+The project is being rebuilt from scratch. Stages 1 and 2 set up the repository, the checks, the release pipeline, the build and the coverage check. The shell comes in stage 3 and the first topics in stage 5. See the [[Roadmap]].
 
 ## Why no framework?
 

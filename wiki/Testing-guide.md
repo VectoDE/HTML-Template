@@ -11,7 +11,7 @@ This page lists what is tested and with which tool. The unit tests, the build ch
 
 ## Planned
 
-The build tests exist and run with `node:test`. These are still planned:
+Still planned:
 
 | Area            | Tool                                       | Stage  |
 | --------------- | ------------------------------------------ | ------ |

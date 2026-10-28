@@ -32,7 +32,7 @@ The file starts with a front matter block between two `---` lines, followed by t
 
 Unknown keys are errors. The front matter is a small subset of YAML: `key: value`, lists as `[a, b]` or as lines starting with `- `, and nothing nested. Indent with spaces, not tabs.
 
-The text uses a Markdown subset: paragraphs, `-` and `1.` lists (one level), fenced code blocks, headings from `##` to `####`, inline code, `**strong**`, `*emphasis*` and `[links](https://example.org)`. The page owns the `h1`, so the text starts at `##` and may not skip a level. Raw HTML is an error. Images, tables, quotes and nested lists are not supported. Link targets must start with `https://`, `http://`, `#`, `./` or `../`, and may not contain spaces or parentheses. `javascript:` and `data:` targets are errors.
+The text uses a Markdown subset: paragraphs, `-` and `1.` lists (one level), fenced code blocks, headings from `##` to `####`, inline code, `**strong**`, `*emphasis*` and `[links](https://example.org)`. The page owns the `h1`, so the text starts at `##` and may not skip a level. Raw HTML is an error. Images, tables, quotes and nested lists are not supported, but they are not errors either. The build renders them as plain text or as a flat list. Link targets must start with `https://`, `http://`, `#`, `./` or `../`, and may not contain spaces or parentheses. `javascript:` and `data:` targets are errors.
 
 ## The demo file
 
@@ -63,7 +63,7 @@ A complete example, with a `template` element inside the HTML code:
     "title": "A template that is cloned on demand",
     "summary": "Use a template when markup should exist once but appear many times, without rendering until you ask for it.",
     "a11y": "The cloned list items keep their text, so screen readers read them as normal list entries.",
-    "fallback": "Browsers without the element show the static list that is already in the page.",
+    "fallback": "Browsers without the element see the empty list and the button does nothing.",
     "features": ["html.elements.template"],
     "detect": "'content' in document.createElement('template')",
     "runsIn": "frame"
@@ -85,7 +85,7 @@ A complete example, with a `template` element inside the HTML code:
 </template>
 ```
 
-Nested `template` elements are matched by counting, so they stay part of the code. A `template` element that is not closed, or a closing tag without an opening one, fails the build with the line of the block. Code inside a block is dedented by its common indent, and blank lines at its start and end are dropped.
+Nested `template` elements are matched by counting, so they stay part of the code. An unclosed `template` fails with the line where it opens. A stray closing tag ends the block early and fails at the text after it. Code inside a block is dedented by its common indent, and blank lines at its start and end are dropped.
 
 ## Rules
 

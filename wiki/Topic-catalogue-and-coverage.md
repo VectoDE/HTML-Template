@@ -71,8 +71,8 @@ The first checks and exits with 1 on any problem. The last rewrites `pending.jso
 ```json
 [
   {
-    "key": "html.elements.example",
-    "reason": "Removed from all browsers and replaced by another element."
+    "key": "html.elements.acronym",
+    "reason": "Deprecated alias of the abbr element, kept out of the teaching content."
   }
 ]
 ```
@@ -81,6 +81,6 @@ The key must exist in the compat data. The reason needs at least ten characters 
 
 ## Deprecated appendix
 
-Deprecated and removed features are not taught. They are listed in a deprecated appendix per category with the replacement, and they count toward completeness. A topic marks itself with `appendix: deprecated` in its front matter. It needs no demos and covers feature units through its `tables:` list. A unit in such a list must be deprecated in the data or removed, which means that none of the seven tracked browsers supports it in its chosen statement. Anything else fails the check by name.
+Deprecated and removed features are not taught. They are listed in a deprecated appendix per category with the replacement, and they count toward completeness. A topic marks itself with `appendix: deprecated` in its front matter. It needs no demos and covers feature units through its `tables:` list. A feature unit in such a list must be deprecated in the data or removed, which means that none of the seven tracked browsers supports it in its chosen statement. Anything else fails the check by name.
 
 See [[Browser support data]] for where the data comes from and [[Writing a demo]] for how a demo declares its keys.

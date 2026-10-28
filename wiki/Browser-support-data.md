@@ -34,7 +34,7 @@ The keys the build checks, and the exclusions, are described in [[Topic catalogu
 
 ## The claims lock
 
-`content/coverage/claims.json` stores the resolved support of every key that a demo lists under `features`. The coverage check fails when the file differs from the current data, so a data update shows which claims moved, as a diff of this file.
+`content/coverage/claims.json` stores the whole resolved entry of every key that a demo lists under `features`: the support per browser, the status flags, the MDN and specification links and the Baseline data. The coverage check compares all of it, so a change to any of these fails when the file differs from the current data, so a data update shows which claims moved, as a diff of this file.
 
 The lock has limits. It covers only the keys a demo lists. Sub-entries that appear in a reference table, and units that have no compat data of their own, are not locked. Those rows follow the data without a diff.
 
