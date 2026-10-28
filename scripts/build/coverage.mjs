@@ -39,9 +39,8 @@ function* selfAndAncestors(key) {
 const isObject = (value) =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-// Plain JSON values, so data read from disk and computed values compare
-// the same way.
-const plain = (value) => JSON.parse(JSON.stringify(value));
+// A detached copy, so the report never shares objects with the caller.
+const plain = (value) => structuredClone(value);
 
 // --- input checks ---------------------------------------------------------
 
@@ -341,8 +340,14 @@ export function formatSummary(report, versions) {
   ];
   const { errors } = report;
   if (errors.length > 0) {
-    lines.push(`### Errors (${errors.length})`, '', '```text');
-    lines.push(...errors.slice(0, SUMMARY_ERRORS), '```', '');
+    lines.push(
+      `### Errors (${errors.length})`,
+      '',
+      '```text',
+      ...errors.slice(0, SUMMARY_ERRORS),
+      '```',
+      '',
+    );
     if (errors.length > SUMMARY_ERRORS) {
       lines.push(`${errors.length - SUMMARY_ERRORS} more in the job log.`, '');
     }
