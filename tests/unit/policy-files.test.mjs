@@ -81,3 +81,55 @@ test('resolveGit uses well-formed Windows paths only on win32', async () => {
   });
   assert.ok(posix.every((p) => !p.includes('Program Files')));
 });
+
+test('repository .gitattributes marks common binary formats', async () => {
+  const { readFileSync } = await import('node:fs');
+  const attrs = readFileSync(
+    new URL('../../.gitattributes', import.meta.url),
+    'utf8',
+  );
+  const binary = [
+    'woff2',
+    'png',
+    'ico',
+    'jpg',
+    'jpeg',
+    'webp',
+    'avif',
+    'gif',
+    'svgz',
+    'woff',
+    'ttf',
+    'otf',
+    'pdf',
+    'mp4',
+    'webm',
+    'mp3',
+    'ogg',
+    'wav',
+    'wasm',
+    'zip',
+    'gz',
+  ];
+  for (const ext of binary) {
+    assert.equal(isBinaryPath(`assets/x.${ext}`, attrs), true, ext);
+  }
+  assert.equal(isBinaryPath('src/a.svg', attrs), false);
+  assert.equal(isBinaryPath('src/a.js', attrs), false);
+});
+
+test('listTrackedTextFiles skips paths marked binary', async () => {
+  const { listTrackedTextFiles } =
+    await import('../../scripts/policy/files.mjs');
+  const files = listTrackedTextFiles({
+    listFiles: () => 'README.md\0assets/a.jpg\0media/b.mp4\0src/c.js\0',
+    readAttributes: () => '* text=auto eol=lf\n*.jpg binary\n*.mp4 binary\n',
+  });
+  assert.deepEqual(files, ['README.md', 'src/c.js']);
+});
+
+test('globstar patterns match nested paths', () => {
+  const attrs = 'fixtures/**/*.bin binary\n';
+  assert.equal(isBinaryPath('fixtures/a/b/c.bin', attrs), true);
+  assert.equal(isBinaryPath('other/c.bin', attrs), false);
+});

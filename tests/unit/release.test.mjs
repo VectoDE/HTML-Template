@@ -89,3 +89,35 @@ test('assertReleaseDate rejects an impossible date', () => {
   const log = '## [1.0.0] - 2026-13-45\n\n- Thing.\n';
   assert.throws(() => assertReleaseDate(log, '1.0.0'), /date/);
 });
+
+test('parseReleaseTag treats a dash in build metadata as stable', () => {
+  assert.deepEqual(parseReleaseTag('v1.0.0+build-1', '1.0.0+build-1'), {
+    version: '1.0.0+build-1',
+    prerelease: false,
+  });
+});
+
+test('parseReleaseTag keeps prerelease true when build metadata follows', () => {
+  assert.equal(
+    parseReleaseTag('v1.0.0-rc.1+build-1', '1.0.0-rc.1+build-1').prerelease,
+    true,
+  );
+});
+
+test('parseReleaseTag rejects empty build identifiers', () => {
+  for (const tag of ['v1.0.0+', 'v1.0.0+a..b', 'v1.0.0+.a', 'v1.0.0+a.']) {
+    assert.throws(() => parseReleaseTag(tag, tag.slice(1)), /semver/, tag);
+  }
+});
+
+test('parseReleaseTag rejects invalid build characters', () => {
+  assert.throws(() => parseReleaseTag('v1.0.0+a_b', '1.0.0+a_b'), /semver/);
+});
+
+test('extractNotes stops at link reference definitions', () => {
+  const log =
+    '## [Unreleased]\n\n## [1.0.0] - 2026-01-01\n\n- Thing.\n\n' +
+    '[Unreleased]: https://example.com/compare/v1.0.0...HEAD\n' +
+    '[1.0.0]: https://example.com/releases/tag/v1.0.0\n';
+  assert.equal(extractNotes(log, '1.0.0'), '- Thing.');
+});

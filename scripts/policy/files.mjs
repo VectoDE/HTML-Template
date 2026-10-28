@@ -24,13 +24,16 @@ export function findCrlf(text) {
   return lines;
 }
 
+// Private-use character that stands in for ** while single * is expanded.
+const GLOBSTAR = String.fromCodePoint(0xe000);
+
 function globToRegex(glob) {
   const escaped = glob
     .replaceAll(/[.+^${}()|[\]\\]/g, String.raw`\$&`)
-    .replaceAll('**', '')
+    .replaceAll('**', GLOBSTAR)
     .replaceAll('*', '[^/]*')
     .replaceAll('?', '[^/]')
-    .replaceAll('', '.*');
+    .replaceAll(GLOBSTAR, '.*');
   return new RegExp(`^${escaped}$`);
 }
 
@@ -47,18 +50,27 @@ export function isBinaryPath(path, gitattributes) {
   return false;
 }
 
-export function listTrackedTextFiles() {
-  const out = execFileSync(gitExecutable(), ['ls-files', '-z'], {
+function gitLsFiles() {
+  return execFileSync(gitExecutable(), ['ls-files', '-z'], {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
   });
-  let attrs = '';
+}
+
+function readGitattributes() {
   try {
-    attrs = readFileSync('.gitattributes', 'utf8');
+    return readFileSync('.gitattributes', 'utf8');
   } catch {
-    // no .gitattributes: nothing is binary
+    return ''; // no .gitattributes: nothing is binary
   }
-  return out
+}
+
+export function listTrackedTextFiles({
+  listFiles = gitLsFiles,
+  readAttributes = readGitattributes,
+} = {}) {
+  const attrs = readAttributes();
+  return listFiles()
     .split('\0')
     .filter(Boolean)
     .filter((p) => !isBinaryPath(p, attrs));

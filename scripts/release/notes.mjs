@@ -2,6 +2,9 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const HEADING = '## [';
+// Keep a Changelog puts link reference definitions such as
+// [1.0.0]: https://... at the bottom; they never belong to a section.
+const LINK_REFERENCE = '[';
 
 function findSection(changelog, version) {
   const lines = changelog.split(/\r?\n/);
@@ -12,7 +15,9 @@ function findSection(changelog, version) {
   }
   const date = lines[start].slice(prefix.length).trim();
   let end = lines.findIndex(
-    (line, index) => index > start && line.startsWith(HEADING),
+    (line, index) =>
+      index > start &&
+      (line.startsWith(HEADING) || line.startsWith(LINK_REFERENCE)),
   );
   if (end === -1) end = lines.length;
   return {

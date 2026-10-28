@@ -25,7 +25,9 @@ function isSemver(text) {
     return false;
   }
   if (pre !== null && !validIdentifiers(pre)) return false;
-  return build === null || /^[0-9A-Za-z.-]+$/.test(build);
+  return (
+    build === null || build.split('.').every((part) => IDENTIFIER.test(part))
+  );
 }
 
 export function parseReleaseTag(tag, pkgVersion) {
@@ -41,7 +43,9 @@ export function parseReleaseTag(tag, pkgVersion) {
       `Version ${version} from tag "${tag}" does not match package.json (${pkgVersion})`,
     );
   }
-  return { version, prerelease: version.includes('-') };
+  const plus = version.indexOf('+');
+  const precedence = plus === -1 ? version : version.slice(0, plus);
+  return { version, prerelease: precedence.includes('-') };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
