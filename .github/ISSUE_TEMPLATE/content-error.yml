@@ -1,0 +1,24 @@
+name: Content error
+description: A page states something that is wrong, outdated or unclear.
+labels: [content-error]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page URL
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is wrong
+      description: Quote the text or describe the demo behavior that is incorrect.
+    validations:
+      required: true
+  - type: textarea
+    id: correct
+    attributes:
+      label: What it should say
+      description: The correct statement, with a source (MDN, a specification or a browser release note).
+    validations:
+      required: true

@@ -1,0 +1,29 @@
+{
+  "name": "html-template",
+  "version": "0.0.0-development",
+  "private": true,
+  "type": "module",
+  "description": "An interactive reference for HTML, CSS and JavaScript.",
+  "license": "MIT",
+  "homepage": "https://vectode.github.io/HTML-Template/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VectoDE/HTML-Template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/VectoDE/HTML-Template/issues"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "policy": "node scripts/policy/run.mjs",
+    "test": "node --test \"tests/unit/**/*.test.mjs\"",
+    "lint": "npm run format:check && npm run policy"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

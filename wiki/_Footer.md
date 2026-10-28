@@ -1,0 +1,1 @@
+HTML-Template is licensed under the MIT License. [Repository](https://github.com/VectoDE/HTML-Template) · [Issues](https://github.com/VectoDE/HTML-Template/issues) · [Discussions](https://github.com/VectoDE/HTML-Template/discussions)

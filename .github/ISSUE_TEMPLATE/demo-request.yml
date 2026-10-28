@@ -1,0 +1,23 @@
+name: Demo request
+description: Ask for a demo of an HTML element, CSS feature or JavaScript API.
+labels: [demo-request]
+body:
+  - type: input
+    id: topic
+    attributes:
+      label: Topic
+      description: The element, property or API, for example `popover` or `Intl.Segmenter`.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What the demo should show
+      description: The real-world use you have in mind. A demo has to be something you could paste into a project.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Reference
+      description: Link to MDN or the specification.

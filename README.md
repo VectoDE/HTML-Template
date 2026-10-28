@@ -1,27 +1,35 @@
-# HTML5-Template
-## Description
-This repository now contains an enterprise-ready HTML5 reference template that demonstrates nearly every HTML5 element, accessibility technique, and best practice within a single `index.html`.
+# HTML-Template
 
-## Usage
-1. Clone this repository to your local machine:
-   ```bash
-   git clone https://github.com/VectoDE/HTML-Template.git
-   ```
-2. Öffnen Sie `index.html` in einem modernen Browser, um alle Beispiele interaktiv zu erleben.
-3. Passen Sie bei Bedarf `styles.css` an, um das Erscheinungsbild an Ihr Corporate Design anzupassen.
+[![CI](https://github.com/VectoDE/HTML-Template/actions/workflows/ci.yml/badge.svg)](https://github.com/VectoDE/HTML-Template/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/VectoDE/HTML-Template/actions/workflows/codeql.yml/badge.svg)](https://github.com/VectoDE/HTML-Template/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/VectoDE/HTML-Template/badge)](https://scorecard.dev/viewer/?uri=github.com/VectoDE/HTML-Template)
+[![License: MIT](https://img.shields.io/github/license/VectoDE/HTML-Template)](LICENSE)
 
-## List of Included HTML5 Tags
-Der Aufbau deckt unter anderem folgende Bereiche ab:
-- Vollständige Dokumentstruktur mit Metadaten, Open Graph, Manifest und strukturierten Daten
-- Typografie, Inline-Semantik, internationale Texte und bidirektionale Beispiele
-- Formulare mit sämtlichen Eingabetypen, Validierung, `<datalist>`, `<output>`, `<progress>` und `<meter>`
-- Medienintegration mit `<picture>`, `<audio>`, `<video>`, `<canvas>`, `<svg>`, `<object>`, `<embed>` und `<iframe>`
-- Interaktive Komponenten wie `<details>`, `<dialog>`, `<template>` &amp; Custom Elements
-- Tabellen mit `<colgroup>`, `<thead>`, `<tbody>`, `<tfoot>` und barrierefreien Attributen
-- Microdata, Schema.org, `<data>`, `<time>` und MathML-Darstellungen
+HTML-Template is becoming an interactive reference for web developers. You look up a feature of HTML, CSS or JavaScript and see it working live. You change the code in the browser, watch the result, and copy it into your own project. Each feature is shown in its modern form, with the parts real projects need: accessibility, error handling and fallbacks.
 
-## Contributors
-- Tim (Vecto) - Lead Developer
+A topic page holds the explanation of a feature, its verified browser support, live demos with an editor, and code you can copy. The site is in English only.
+
+## Status
+
+The project is being rebuilt in seven stages. Stage 1 is under way: repository, CI, OpenSSF checks, the wiki and the release pipeline. There is no deployed site yet.
+
+- [Roadmap](https://github.com/VectoDE/HTML-Template/wiki/Roadmap)
+- [Project board](https://github.com/users/VectoDE/projects/12)
+
+## Local setup
+
+You need Node.js 24 (pinned in `.nvmrc`).
+
+```sh
+npm ci --ignore-scripts
+npm test
+npm run lint
+```
+
+## Contributing and security
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before you open a pull request. Commits need a sign-off (`git commit -s`). Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report vulnerabilities privately, as [SECURITY.md](SECURITY.md) describes.
 
 ## License
-This project is licensed under the [MIT License](https://github.com/VectoDE/HTML-Template/blob/main/LICENSE).
+
+[MIT](LICENSE)
