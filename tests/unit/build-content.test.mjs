@@ -1,6 +1,6 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, mkdir } from 'node:fs/promises';
+import { mkdtemp, rm, mkdir, readdir, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { loadContent } from '../../scripts/build/content.mjs';
@@ -288,4 +288,33 @@ test('an unreadable dir is reported, other errors are rethrown', async () => {
     }),
     TypeError,
   );
+});
+
+test('a symbolic link is reported and never followed', async () => {
+  const dir = join(base, `case-${counter++}`);
+  await writeTree(dir, OK);
+  const link = (name) => ({
+    name,
+    isDirectory: () => false,
+    isSymbolicLink: () => true,
+  });
+  const reads = [];
+  const io = {
+    readdir: async (where, options) => {
+      const entries = await readdir(where, options);
+      return where.endsWith('dialog')
+        ? [...entries, link('03-linked.demo.html')]
+        : entries;
+    },
+    readFile: async (path, enc) => {
+      reads.push(path);
+      return readFile(path, enc);
+    },
+  };
+  const { topics, errors } = await loadContent(dir, io);
+  assert.deepEqual(errors, [
+    'content/html/dialog/03-linked.demo.html:1 symbolic links are not allowed',
+  ]);
+  assert.equal(topics[0].demos.length, 2);
+  assert.ok(reads.every((p) => !p.includes('linked')));
 });

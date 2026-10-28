@@ -2,7 +2,7 @@
 // three <template data-lang="html|css|js"> blocks. The scanner works with
 // indexOf and slice, no backtracking regular expressions.
 
-import { ContentError } from './frontmatter.mjs';
+import { ContentError, stripBom } from './frontmatter.mjs';
 import { NAMESPACES, PERMISSIONS } from './config.mjs';
 
 const META_OPEN = '<script type="application/json" data-demo-meta>';
@@ -255,7 +255,7 @@ function readTemplates(text, from, file) {
 }
 
 export function parseDemo(input, file) {
-  const text = input.replaceAll('\r\n', '\n');
+  const text = stripBom(input).replaceAll('\r\n', '\n');
   const { meta, next } = readMeta(text, file);
   const code = readTemplates(text, next, file);
   return {

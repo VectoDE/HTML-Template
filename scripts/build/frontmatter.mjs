@@ -140,8 +140,13 @@ function parseBlock(lines, file, firstLine) {
   return data;
 }
 
+// A UTF-8 byte order mark some editors put at the start of a file.
+export function stripBom(text) {
+  return text.startsWith('﻿') ? text.slice(1) : text;
+}
+
 export function parseFrontMatter(text, file) {
-  const lines = text.replaceAll('\r\n', '\n').split('\n');
+  const lines = stripBom(text).replaceAll('\r\n', '\n').split('\n');
   if (lines[0].trimEnd() !== MARKER) {
     throw new ContentError(file, 1, 'file must start with a "---" line');
   }

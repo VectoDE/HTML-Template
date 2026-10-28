@@ -174,3 +174,7 @@ test('structure errors', () => {
   fails(meta() + 'stray' + tpl('js', 'a'), /unexpected text/);
   fails(meta() + tpl('js', 'a') + 'tail', /unexpected text/);
 });
+
+test('a leading BOM is ignored', () => {
+  assert.deepEqual(parse(`\uFEFF${FULL}`), parse(FULL));
+});

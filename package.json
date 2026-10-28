@@ -27,7 +27,9 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@mdn/browser-compat-data": "8.1.7",
     "eslint": "10.13.0",
-    "prettier": "3.9.10"
+    "prettier": "3.9.10",
+    "web-features": "3.44.0"
   }
 }

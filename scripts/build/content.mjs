@@ -134,7 +134,13 @@ function createContext(dir, io) {
         const where =
           rel === ROOT ? dir : join(dir, rel.slice(ROOT.length + 1));
         const entries = await io.readdir(where, { withFileTypes: true });
-        return entries.sort((a, b) => (a.name < b.name ? -1 : 1));
+        // A link could point outside content/, so it is reported, not read.
+        for (const link of entries.filter((e) => e.isSymbolicLink())) {
+          errors.push(`${rel}/${link.name}:1 symbolic links are not allowed`);
+        }
+        return entries
+          .filter((e) => !e.isSymbolicLink())
+          .sort((a, b) => (a.name < b.name ? -1 : 1));
       } catch (error) {
         if (!READ_CODES.has(error?.code)) throw error;
         errors.push(`${rel}:1 cannot read this folder (${error.code})`);

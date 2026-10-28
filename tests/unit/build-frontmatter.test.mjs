@@ -124,3 +124,10 @@ test('a tab inside a block list item is rejected', () => {
     (e) => /tabs are not allowed/.test(e.message),
   );
 });
+
+test('a leading BOM is ignored', () => {
+  assert.deepEqual(
+    parseFrontMatter(`\uFEFF${SAMPLE}`, 'a.md'),
+    parseFrontMatter(SAMPLE, 'a.md'),
+  );
+});

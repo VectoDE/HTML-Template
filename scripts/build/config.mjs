@@ -69,3 +69,24 @@ export const PERMISSIONS = Object.freeze(
     ]),
   ),
 );
+
+// Browsers the reference tracks, as named in browser-compat-data.
+export const BROWSERS = Object.freeze([
+  'chrome',
+  'chrome_android',
+  'edge',
+  'firefox',
+  'firefox_android',
+  'safari',
+  'safari_ios',
+]);
+
+export const BROWSER_LABELS = Object.freeze({
+  chrome: 'Chrome',
+  chrome_android: 'Chrome Android',
+  edge: 'Edge',
+  firefox: 'Firefox',
+  firefox_android: 'Firefox for Android',
+  safari: 'Safari',
+  safari_ios: 'Safari on iOS',
+});
