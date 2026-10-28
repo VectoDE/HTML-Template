@@ -25,11 +25,11 @@ nvm-windows ignores `.nvmrc`. With it, run `nvm install 24` and then `nvm use 24
 
 `npm ci --ignore-scripts` installs exactly what the lockfile says and does not run dependency install scripts. Use it locally as well as in CI.
 
-`npm run format` rewrites files with Prettier. `npm run lint` checks formatting and the repository policy checks without changing anything.
+`npm run format` rewrites files with Prettier. `npm run lint` checks formatting, runs ESLint and runs the repository policy checks without changing anything. `npm run build` writes the static site to `dist/site`, and `npm run coverage` checks that every browser-compat unit is covered, excluded or pending. If you change files under `content/`, run both.
 
 ## Dependencies
 
-Prettier is currently the only dev dependency. It formats Markdown, YAML, JSON, JavaScript and CSS, so the repository needs no per-language tooling. A new dev dependency needs a stated reason in the pull request, and the shipped site has no runtime dependencies. Do not add a package for something a few lines of code or a platform feature can do.
+There are five dev dependencies. Prettier formats Markdown, YAML, JSON, JavaScript and CSS. ESLint and `@eslint/js` lint the JavaScript. `@mdn/browser-compat-data` and `web-features` are the data the build turns into browser support tables and the coverage check. Their versions are pinned exactly. A new dev dependency needs a stated reason in the pull request, and the shipped site has no runtime dependencies. Do not add a package for something a few lines of code or a platform feature can do.
 
 ## Commits
 
@@ -37,7 +37,7 @@ Use [conventional commits](https://www.conventionalcommits.org/): `type: short s
 
 The type matters because the release notes are generated from the commits. `feat` goes under Features, `fix` and `perf` under Fixes, and every other type under Other. After 1.0.0 the type also decides the next version: `feat` raises the minor version, `fix` and `perf` the patch version. A breaking change is marked with `!` after the type, as in `feat!: drop the old URLs`, or with a `BREAKING CHANGE:` footer, and raises the major version. The [Release process](https://github.com/VectoDE/HTML-Template/wiki/Release-process) page has the details.
 
-Pull requests are squash-merged, so the pull request title becomes the commit on `main`. Only that title reaches the release notes and the version bump, and the commit types inside the pull request are lost. Give the title a conventional type, for example `feat(release): derive the next version from stage issues`.
+Pull requests are squash-merged, so the pull request title becomes the commit on `main`. Only that title reaches the release notes and the version bump, and the commit types inside the pull request are lost. Give the title a conventional type, for example `feat(release): derive the next version from stage issues`. The `dco` workflow checks the title and fails when it is not a conventional commit header.
 
 End the message with a reference to the issue it belongs to:
 
@@ -70,7 +70,7 @@ How decisions are made and how to become a maintainer is described in [GOVERNANC
 
 ## Writing a demo
 
-A wiki page, "Writing a demo", will cover structure, metadata and what makes a demo worth including: <https://github.com/VectoDE/HTML-Template/wiki/Writing-a-demo>. It does not exist yet, so please hold off on demo pull requests until it does. Demo requests are welcome as issues.
+The wiki page [Writing a demo](https://github.com/VectoDE/HTML-Template/wiki/Writing-a-demo) describes the file format, the metadata and what makes a demo worth including. Demo pull requests open together with the topic batches in stage 5, so please hold off until then. Demo requests are welcome as issues.
 
 ## License
 

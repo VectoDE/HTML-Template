@@ -1,18 +1,20 @@
-This page lists what is tested and with which tool. Only the unit tests and the policy checks exist today. The rest is added with the stage that builds the thing under test.
+This page lists what is tested and with which tool. The unit tests, the build checks and the policy checks exist today. The rest is added with the stage that builds the thing under test.
 
 ## Exists now
 
-- Unit tests with the Node test runner, in `tests/unit`. Run them with `npm test`. They cover the policy checks, the release helpers and the wiki link check.
+- Unit tests with the Node test runner, in `tests/unit`. Run them with `npm test`. They cover the build (content reading, Markdown, demo files, support extraction, rendering, output files and the coverage check), the policy checks, the release helpers and the wiki link check. `npm run test:coverage` fails below 80 percent for lines, branches and functions.
 - Policy checks, run with `npm run policy`. They check the workflow files, line endings, forbidden text in tracked files and links between wiki pages.
 - The `dco` workflow on pull requests checks the sign-off and forbidden text in every commit message, and forbidden text in the pull request title and body.
-- Formatting with Prettier, run with `npm run format:check`.
+- Formatting with Prettier, run with `npm run format:check`, and ESLint, run with `npm run lint:js`.
+- The build and the coverage check run in the CI job `build`. Build tests use fixtures made in memory or in a temporary folder, never `.html` files in the repository.
 - CodeQL and the OpenSSF Scorecard run in GitHub Actions.
 
 ## Planned
 
+The build tests exist and run with `node:test`. These are still planned:
+
 | Area            | Tool                                       | Stage  |
 | --------------- | ------------------------------------------ | ------ |
-| Build           | `node:test`                                | 2      |
 | Editor          | `node:test`, fake IndexedDB                | 3      |
 | Shell and demos | Playwright in Chromium, Firefox and WebKit | 3 to 5 |
 | Accessibility   | axe-core inside Playwright                 | 3      |
