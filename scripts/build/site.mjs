@@ -1,13 +1,14 @@
 // The build orchestrator: content and compat data in, the static site out.
 // buildSite is pure (a map of POSIX paths to text); main reads the project,
-// runs the coverage gate, and writes the files below dist/.
+// and writes the files below dist/. The coverage gate is its own step
+// (npm run coverage).
 
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { lstat, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { indexBaseline, indexCompat } from './compat.mjs';
 import { SITE, absoluteUrl } from './config.mjs';
 import { loadContent } from './content.mjs';
-import { main as runCoverage, serializeList } from './coverage.mjs';
+import { serializeList } from './coverage.mjs';
 import { loadCompatData } from './data.mjs';
 import {
   buildNav,
@@ -78,8 +79,12 @@ export function buildSite({
       serializeList(data),
     );
   }
-  files.set('precache.json', serializeList(buildPrecache(files, { site })));
-  return { files: new Map([...files].toSorted(byPath)), errors };
+  // LF only, so the precache hashes match the bytes that get written.
+  const lf = new Map(
+    [...files].map(([path, text]) => [path, text.replaceAll('\r\n', '\n')]),
+  );
+  lf.set('precache.json', serializeList(buildPrecache(lf, { site })));
+  return { files: new Map([...lf].toSorted(byPath)), errors };
 }
 
 // out must lie strictly below <root>/dist, so a mistaken value can never
@@ -91,15 +96,44 @@ function safeOut(root, out) {
   return inside ? target : null;
 }
 
+// True when dist or any folder on the way to out is a link (symlink or
+// junction): rm would then follow it out of the project.
+async function hasLink(root, target) {
+  const dist = resolve(root, DIST);
+  const steps = relative(dist, target).split(sep);
+  let path = dist;
+  for (const step of ['', ...steps]) {
+    path = join(path, step);
+    try {
+      if ((await lstat(path)).isSymbolicLink()) return true;
+    } catch (error) {
+      if (error?.code === 'ENOENT') return false;
+      throw error;
+    }
+  }
+  return false;
+}
+
 async function writeFiles(dir, files) {
   await rm(dir, { recursive: true, force: true });
   await Promise.all(
     [...files].map(async ([path, text]) => {
       const target = join(dir, path);
       await mkdir(dirname(target), { recursive: true });
-      await writeFile(target, text.replaceAll('\r\n', '\n'));
+      await writeFile(target, text);
     }),
   );
+}
+
+async function readExclusions(root) {
+  try {
+    return JSON.parse(
+      await readFile(join(root, 'content/coverage/exclusions.json'), 'utf8'),
+    );
+  } catch (error) {
+    if (error?.code === 'ENOENT') return [];
+    throw error;
+  }
 }
 
 export async function main(
@@ -107,21 +141,23 @@ export async function main(
   {
     root = process.cwd(),
     out = DEFAULT_OUT,
-    env = process.env,
     stdout,
     stderr,
     load = loadCompatData,
   } = {},
 ) {
+  if (argv.length > 0) {
+    stderr.write(`build: unknown option ${argv.join(' ')}. Usage: build.mjs\n`);
+    return 1;
+  }
   const rootDir = resolve(root);
   const outDir = safeOut(rootDir, out);
-  if (outDir === null) {
+  if (outDir === null || (await hasLink(rootDir, outDir))) {
     stderr.write(
-      `build: refusing to use "${out}" as the output folder, it must be a folder below ${DIST}/\n`,
+      `build: refusing to use "${out}" as the output folder, it must be a real folder below ${DIST}/\n`,
     );
     return 1;
   }
-  const data = await load();
   const content = await loadContent(join(rootDir, 'content'));
   if (content.errors.length > 0) {
     stderr.write(
@@ -129,23 +165,12 @@ export async function main(
     );
     return 1;
   }
-  const gate = await runCoverage([], {
-    root: rootDir,
-    env,
-    stdout,
-    stderr,
-    load: async () => data,
-  });
-  if (gate !== 0) return gate;
-
-  const exclusions = JSON.parse(
-    await readFile(join(rootDir, 'content/coverage/exclusions.json'), 'utf8'),
-  );
+  const data = await load();
   const { files, errors } = buildSite({
     topics: content.topics,
     index: indexCompat(data.bcd),
     baseline: indexBaseline(data.webFeatures),
-    exclusions,
+    exclusions: await readExclusions(rootDir),
   });
   if (errors.length > 0) {
     stderr.write(

@@ -1,10 +1,17 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { access, mkdtemp, readFile, rm } from 'node:fs/promises';
+import {
+  access,
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  symlink,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { indexBaseline, indexCompat } from '../../scripts/build/compat.mjs';
-import { main as coverageMain } from '../../scripts/build/coverage.mjs';
 import { buildSite, main } from '../../scripts/build/site.mjs';
 import {
   makeTopic,
@@ -88,6 +95,12 @@ test('precache lists every other file', () => {
   ]);
 });
 
+test('buildSite turns CRLF into LF before it hashes the precache', () => {
+  const lf = buildSite(input([makeTopic({ bodyHtml: '<p>a\nb</p>' })]));
+  const crlf = buildSite(input([makeTopic({ bodyHtml: '<p>a\r\nb</p>' })]));
+  assert.deepEqual(crlf.files, lf.files);
+});
+
 test('two runs give identical files', () => {
   const a = buildSite(input([makeTopic()]));
   const b = buildSite(input([makeTopic()]));
@@ -167,15 +180,6 @@ async function project(files = {}) {
     'content/coverage/exclusions.json': '[]\n',
     ...files,
   });
-  // Brings pending.json and claims.json in line with the content.
-  const code = await coverageMain(['--update'], {
-    root,
-    env: {},
-    stdout: sink(),
-    stderr: sink(),
-    load: async () => fixtureData(),
-  });
-  assert.equal(code, 0);
   return root;
 }
 
@@ -184,7 +188,6 @@ async function run(root, options = {}) {
   const stderr = sink();
   const code = await main([], {
     root,
-    env: {},
     stdout,
     stderr,
     load: async () => fixtureData(),
@@ -206,6 +209,10 @@ const tree = (nl) => ({
     nl,
   ),
 });
+
+const unreachable = async () => {
+  throw new Error('reached');
+};
 
 test('main builds the site into dist/site', async () => {
   const root = await project(tree('\n'));
@@ -229,24 +236,34 @@ test('main replaces the old output', async () => {
   assert.equal(await exists(join(root, 'dist/site/stale.txt')), false);
 });
 
-const OUTPUTS = [
-  'index.html',
-  'html/dialog/index.html',
-  'data/compat/html/dialog.json',
-  'data/search-index.json',
-  'precache.json',
-  'sitemap.xml',
-];
+// Every file below dir, as Map<posix path, Buffer>.
+async function readTree(dir) {
+  const names = await readdir(dir, { recursive: true, withFileTypes: true });
+  const entries = await Promise.all(
+    names
+      .filter((e) => e.isFile())
+      .map(async (e) => {
+        const full = join(e.parentPath, e.name);
+        const key = full.slice(dir.length + 1).replaceAll('\\', '/');
+        return [key, await readFile(full)];
+      }),
+  );
+  return new Map(entries.toSorted(([x], [y]) => (x < y ? -1 : 1)));
+}
 
-const readOutputs = (root) =>
-  Promise.all(OUTPUTS.map((f) => readFile(join(root, 'dist/site', f), 'utf8')));
-
-test('CRLF and LF sources give identical output', async () => {
+test('CRLF and LF sources give identical output trees', async () => {
   const lf = await project(tree('\n'));
   const crlf = await project(tree('\r\n'));
   assert.equal((await run(lf)).code, 0);
   assert.equal((await run(crlf)).code, 0);
-  assert.deepEqual(await readOutputs(crlf), await readOutputs(lf));
+  const a = await readTree(join(lf, 'dist/site'));
+  const b = await readTree(join(crlf, 'dist/site'));
+  assert.ok(a.has('data/nav.json') && a.has('robots.txt'));
+  assert.deepEqual([...b.keys()], [...a.keys()]);
+  for (const [path, bytes] of a) {
+    assert.ok(bytes.equals(b.get(path)), path);
+    assert.ok(!bytes.includes(13), `${path} has CR`);
+  }
 });
 
 test('main with empty content builds the home page only', async () => {
@@ -256,13 +273,20 @@ test('main with empty content builds the home page only', async () => {
   assert.match(out, /build: 6 files, 0 topics, 0 demos/);
 });
 
+test('main builds without an exclusions file', async () => {
+  const root = await project();
+  await rm(join(root, 'content/coverage/exclusions.json'));
+  await mkdir(join(root, 'content/coverage'), { recursive: true });
+  assert.equal((await run(root)).code, 0);
+});
+
 test('content errors print and exit 1 without touching out', async () => {
   const root = await project();
   await writeTree(root, {
     'dist/site/keep.txt': 'keep',
     'content/html/dialog/topic.md': 'no front matter',
   });
-  const { code, err } = await run(root);
+  const { code, err } = await run(root, { load: unreachable });
   assert.equal(code, 1);
   assert.match(err, /content\/html\/dialog\/topic\.md/);
   assert.equal(
@@ -288,18 +312,9 @@ test('an unknown demo key exits 1 and writes nothing', async () => {
   assert.equal(await exists(join(root, 'dist/site/index.html')), false);
 });
 
-test('a failing coverage gate stops the build', async () => {
-  const root = await project(tree('\n'));
-  await writeTree(root, { 'content/coverage/pending.json': '["api.Old"]' });
-  const { code, err } = await run(root);
-  assert.equal(code, 1);
-  assert.match(err, /coverage: failed/);
-  assert.equal(await exists(join(root, 'dist/site/index.html')), false);
-});
-
 test('main refuses out equal to the root and deletes nothing', async () => {
   const root = await project();
-  const { code, err } = await run(root, { out: '.' });
+  const { code, err } = await run(root, { out: '.', load: unreachable });
   assert.equal(code, 1);
   assert.match(err, /refusing/);
   assert.ok(await exists(join(root, 'content/coverage/exclusions.json')));
@@ -307,14 +322,74 @@ test('main refuses out equal to the root and deletes nothing', async () => {
 
 test('main refuses out outside root/dist and deletes nothing', async () => {
   const root = await project();
-  await writeTree(root, { 'other/file.txt': 'x' });
-  for (const out of ['other', 'content', '../elsewhere', join(root, 'other')]) {
-    const { code, err } = await run(root, { out });
+  await writeTree(root, {
+    'other/file.txt': 'x',
+    '../sibling-of-root/file.txt': 'x',
+  });
+  const outs = [
+    'other',
+    'content',
+    '..',
+    '../sibling-of-root',
+    'dist',
+    'dist/',
+    join(root, 'other'),
+  ];
+  for (const out of outs) {
+    const { code, err } = await run(root, { out, load: unreachable });
     assert.equal(code, 1, out);
-    assert.match(err, /refusing/);
+    assert.match(err, /refusing/, out);
   }
   assert.ok(await exists(join(root, 'other/file.txt')));
+  assert.ok(await exists(join(root, '../sibling-of-root/file.txt')));
   assert.ok(await exists(join(root, 'content/coverage/exclusions.json')));
+  await rm(join(root, '../sibling-of-root'), { recursive: true });
+});
+
+test('main refuses when dist is a link and deletes nothing', async (t) => {
+  const root = await project();
+  const elsewhere = join(base, `target-${counter++}`);
+  await writeTree(elsewhere, { 'site/file.txt': 'keep' });
+  try {
+    await symlink(elsewhere, join(root, 'dist'), 'junction');
+  } catch {
+    t.skip('this platform cannot create a directory link here');
+    return;
+  }
+  const { code, err } = await run(root, { load: unreachable });
+  assert.equal(code, 1);
+  assert.match(err, /refusing/);
+  assert.ok(await exists(join(elsewhere, 'site/file.txt')));
+});
+
+test('main refuses when a folder below dist is a link', async (t) => {
+  const root = await project();
+  const elsewhere = join(base, `target-${counter++}`);
+  await writeTree(elsewhere, { 'file.txt': 'keep' });
+  await mkdir(join(root, 'dist'), { recursive: true });
+  try {
+    await symlink(elsewhere, join(root, 'dist/site'), 'junction');
+  } catch {
+    t.skip('this platform cannot create a directory link here');
+    return;
+  }
+  const { code, err } = await run(root, { load: unreachable });
+  assert.equal(code, 1);
+  assert.match(err, /refusing/);
+  assert.ok(await exists(join(elsewhere, 'file.txt')));
+});
+
+test('main rejects unknown arguments', async () => {
+  const root = await project();
+  const stderr = sink();
+  const code = await main(['--strict'], {
+    root,
+    stdout: sink(),
+    stderr,
+    load: unreachable,
+  });
+  assert.equal(code, 1);
+  assert.match(stderr.box.text, /unknown option --strict/);
 });
 
 test('main accepts another folder below dist', async () => {
