@@ -2,6 +2,8 @@ name: dco
 
 on:
   pull_request:
+    # edited re-runs the check when the title or body changes.
+    types: [opened, synchronize, reopened, edited]
 
 permissions: {}
 
@@ -23,8 +25,13 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-      - name: Check sign-off
+      - name: Check sign-off and commit messages
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: node scripts/policy/dco.mjs "$BASE_SHA" "$HEAD_SHA"
+      - name: Check pull request title and body
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: node scripts/policy/attribution-cli.mjs

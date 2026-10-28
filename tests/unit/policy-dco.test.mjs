@@ -76,3 +76,35 @@ test('bot name with human email fails', () => {
   };
   assert.equal(checkDco([c]).length, 1);
 });
+
+test('parseGitLog reads real git output with a merge commit and CRLF body', async () => {
+  const { parseGitLog } = await import('../../scripts/policy/dco.mjs');
+  const a = 'a'.repeat(40);
+  const b = 'b'.repeat(40);
+  const c = 'c'.repeat(40);
+  // Shape of `git log --format=%H%x1f%an%x1f%ae%x1f%P%x1f%B%x1e`: %B ends
+  // with a newline and git puts another newline after each record.
+  const output =
+    `${a}\x1fJane Doe\x1fjane@example.com\x1f${b} ${c}\x1fMerge branch 'x'\n\x1e\n` +
+    `${b}\x1fJane Doe\x1fjane@example.com\x1f${c}\x1ffeat: x\r\n\r\nSigned-off-by: Jane Doe <jane@example.com>\r\n\x1e\n`;
+  const commits = parseGitLog(output);
+  assert.equal(commits.length, 2);
+  assert.equal(commits[0].sha, a);
+  assert.equal(commits[0].parents, 2);
+  assert.equal(commits[1].sha, b);
+  assert.equal(commits[1].parents, 1);
+  assert.equal(commits[1].authorName, 'Jane Doe');
+  assert.deepEqual(checkDco(commits), []);
+});
+
+test('verifyCommits fails when no commits were parsed', async () => {
+  const { verifyCommits } = await import('../../scripts/policy/dco.mjs');
+  const errors = verifyCommits([]);
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /no commits/);
+});
+
+test('verifyCommits passes signed clean commits', async () => {
+  const { verifyCommits } = await import('../../scripts/policy/dco.mjs');
+  assert.deepEqual(verifyCommits([human]), []);
+});

@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
+import { findAttribution } from './attribution.mjs';
 import { gitExecutable } from './git.mjs';
 
 const BOT_NAMES = new Set(['dependabot[bot]', 'github-actions[bot]']);
@@ -51,6 +52,27 @@ export function checkDco(commits) {
   return errors;
 }
 
+export function checkCommitAttribution(commits) {
+  const errors = [];
+  for (const commit of commits) {
+    for (const { line, match } of findAttribution(commit.message)) {
+      errors.push(
+        `${commit.sha.slice(0, 7)}: forbidden attribution text "${match}" in message line ${line}`,
+      );
+    }
+  }
+  return errors;
+}
+
+// A pull request always has at least one commit, so an empty list means the
+// git log format or the parser broke and the check must not pass silently.
+export function verifyCommits(commits) {
+  if (commits.length === 0) {
+    return ['no commits found in the range; check the git log format'];
+  }
+  return [...checkDco(commits), ...checkCommitAttribution(commits)];
+}
+
 export function parseGitLog(output) {
   return output
     .split('\x1e')
@@ -81,10 +103,10 @@ function main() {
     { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
   );
   const commits = parseGitLog(output);
-  const errors = checkDco(commits);
+  const errors = verifyCommits(commits);
   if (errors.length > 0) {
     console.error(errors.join('\n'));
-    console.error(`\ndco: ${errors.length} commit(s) without sign-off`);
+    console.error(`\ndco: ${errors.length} problem(s) found`);
     process.exit(1);
   }
   console.log(`dco: ok (${commits.length} commits checked)`);

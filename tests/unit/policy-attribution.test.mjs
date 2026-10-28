@@ -45,3 +45,94 @@ test('ignores human co-authors and unrelated mentions', () => {
   );
   assert.deepEqual(findAttribution('Claude Monet painted water lilies'), []);
 });
+
+const signed = {
+  sha: 'abcdef1234567890',
+  authorName: 'Jane Doe',
+  authorEmail: 'jane@example.com',
+  parents: 1,
+};
+
+test('commit message check flags a trailer with the short sha', async () => {
+  const { checkCommitAttribution } =
+    await import('../../scripts/policy/dco.mjs');
+  const errors = checkCommitAttribution([
+    {
+      ...signed,
+      message:
+        'feat: x\n\nSigned-off-by: Jane Doe <jane@example.com>\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n',
+    },
+  ]);
+  assert.ok(errors.length >= 1);
+  assert.ok(
+    errors.every((e) => e.startsWith('abcdef1: forbidden attribution text')),
+  );
+  assert.ok(errors.every((e) => e.endsWith('message line 4')));
+});
+
+test('commit message check passes a clean commit', async () => {
+  const { checkCommitAttribution } =
+    await import('../../scripts/policy/dco.mjs');
+  assert.deepEqual(
+    checkCommitAttribution([
+      {
+        ...signed,
+        message: 'feat: x\n\nSigned-off-by: Jane Doe <jane@example.com>\n',
+      },
+    ]),
+    [],
+  );
+});
+
+test('verifyCommits reports both sign-off and attribution problems', async () => {
+  const { verifyCommits } = await import('../../scripts/policy/dco.mjs');
+  const errors = verifyCommits([
+    { ...signed, message: 'x\n\n🤖 Generated with [Claude Code](x)\n' },
+  ]);
+  assert.ok(errors.some((e) => e.includes('missing Signed-off-by')));
+  assert.ok(errors.some((e) => e.includes('forbidden attribution text')));
+});
+
+test('pull request text check flags title and body separately', async () => {
+  const { checkPullRequestText } =
+    await import('../../scripts/policy/attribution-cli.mjs');
+  const errors = checkPullRequestText({
+    title: 'feat: add things',
+    body: 'Summary\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n',
+  });
+  assert.ok(errors.length >= 1);
+  assert.ok(errors.every((e) => e.startsWith('pull request body:3')));
+  assert.equal(
+    checkPullRequestText({ title: 'Co-Authored-By: Claude', body: '' })[0]
+      .split(' ')
+      .slice(0, 3)
+      .join(' '),
+    'pull request title:1',
+  );
+});
+
+test('pull request text check passes clean text and missing body', async () => {
+  const { checkPullRequestText } =
+    await import('../../scripts/policy/attribution-cli.mjs');
+  assert.deepEqual(checkPullRequestText({ title: 'fix: y', body: '' }), []);
+  assert.deepEqual(checkPullRequestText({ title: 'fix: y' }), []);
+});
+
+test('attribution CLI exits 1 on a forbidden PR body and 0 on clean text', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const { fileURLToPath } = await import('node:url');
+  const cli = fileURLToPath(
+    new URL('../../scripts/policy/attribution-cli.mjs', import.meta.url),
+  );
+  const bad = spawnSync(process.execPath, [cli], {
+    env: { PR_TITLE: 'fix: y', PR_BODY: 'x\nnoreply@anthropic.com\n' },
+    encoding: 'utf8',
+  });
+  assert.equal(bad.status, 1);
+  assert.match(bad.stderr, /pull request body:2/);
+  const good = spawnSync(process.execPath, [cli], {
+    env: { PR_TITLE: 'fix: y', PR_BODY: 'plain text' },
+    encoding: 'utf8',
+  });
+  assert.equal(good.status, 0);
+});
