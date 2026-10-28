@@ -1,6 +1,6 @@
 {
   "name": "html-template",
-  "version": "1.0.0-alpha.1",
+  "version": "0.0.0-development",
   "private": true,
   "type": "module",
   "description": "An interactive reference for HTML, CSS and JavaScript.",

@@ -1,8 +1,11 @@
 name: release
 
+# tag.yml starts this workflow with workflow_dispatch on the new tag. A tag
+# that the owner pushes starts it through the push trigger.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions: {}
 
@@ -12,6 +15,8 @@ concurrency:
 
 jobs:
   build:
+    # Only a tag ref keeps the signing identity at release.yml@refs/tags/v...
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -38,13 +43,24 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run lint
       - run: npm test
+      # The tag carries the version. It is stamped into the built package.json
+      # only and never committed.
+      - name: Stamp the version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: npm pkg set version="$VERSION"
       - name: Package source archive
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          mkdir dist
-          git archive --format=tar.gz --prefix="html-template-${VERSION}/" \
-            -o "dist/html-template-${VERSION}.tar.gz" "$GITHUB_SHA"
+          name="html-template-${VERSION}"
+          stage="$RUNNER_TEMP/stage"
+          mkdir -p dist "$stage"
+          git archive --format=tar --prefix="${name}/" "$GITHUB_SHA" | tar -x -C "$stage"
+          cp package.json "$stage/${name}/package.json"
+          mtime="$(git log -1 --format=%ct "$GITHUB_SHA")"
+          tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="@${mtime}" \
+            -C "$stage" -cf - "$name" | gzip -n > "dist/${name}.tar.gz"
       - name: Generate SBOM
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
@@ -55,11 +71,12 @@ jobs:
           upload-release-assets: false
       - name: Collect SBOM and release notes
         env:
+          TAG: ${{ github.ref_name }}
           VERSION: ${{ steps.version.outputs.version }}
           SBOM: ${{ runner.temp }}/sbom.spdx.json
         run: |
           mv "$SBOM" "dist/html-template-${VERSION}.spdx.json"
-          node scripts/release/notes.mjs "$VERSION" > dist/notes.md
+          node scripts/release/notes.mjs "$TAG" > dist/notes.md
       - name: Hash release assets
         id: hash
         env:
