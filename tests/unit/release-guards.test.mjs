@@ -12,10 +12,19 @@ const stages = JSON.parse(
   readFileSync(new URL('../../.github/release-stages.json', import.meta.url)),
 );
 
-const run = (name, conclusion, startedAt = '2026-10-28T10:00:00Z') => ({
+const HEAD = 'c0ffee0000000000000000000000000000000000';
+
+const run = (
+  name,
+  conclusion,
+  startedAt = '2026-10-28T10:00:00Z',
+  { app = 'github-actions', sha = HEAD } = {},
+) => ({
   name,
   conclusion,
   started_at: startedAt,
+  head_sha: sha,
+  app: { slug: app },
 });
 
 test('release-stages.json maps the stage issues to their channels', () => {
@@ -46,7 +55,7 @@ test('missingChecks is empty when every required check succeeded', () => {
     { check_runs: REQUIRED_CHECKS.slice(0, 2).map((n) => run(n, 'success')) },
     { check_runs: REQUIRED_CHECKS.slice(2).map((n) => run(n, 'success')) },
   ];
-  assert.deepEqual(missingChecks(pages), []);
+  assert.deepEqual(missingChecks(pages, HEAD), []);
 });
 
 test('missingChecks names absent and failed checks', () => {
@@ -60,7 +69,7 @@ test('missingChecks names absent and failed checks', () => {
       ],
     },
   ];
-  assert.deepEqual(missingChecks(pages), [
+  assert.deepEqual(missingChecks(pages, HEAD), [
     'test',
     'actionlint',
     'analyze (javascript-typescript)',
@@ -74,7 +83,7 @@ test('missingChecks uses the latest run of a check', () => {
     run('lint', 'success', '2026-10-28T09:30:00Z'),
   ];
   assert.deepEqual(
-    missingChecks([{ check_runs: [...failedThenFixed, ...others] }]),
+    missingChecks([{ check_runs: [...failedThenFixed, ...others] }], HEAD),
     [],
   );
   const fixedThenFailed = [
@@ -82,14 +91,61 @@ test('missingChecks uses the latest run of a check', () => {
     run('lint', 'failure', '2026-10-28T09:30:00Z'),
   ];
   assert.deepEqual(
-    missingChecks([{ check_runs: [...fixedThenFailed, ...others] }]),
+    missingChecks([{ check_runs: [...fixedThenFailed, ...others] }], HEAD),
     ['lint'],
   );
 });
 
 test('missingChecks treats unreadable input as nothing passed', () => {
-  assert.deepEqual(missingChecks(null), REQUIRED_CHECKS);
-  assert.deepEqual(missingChecks({ check_runs: [] }), REQUIRED_CHECKS);
+  assert.deepEqual(missingChecks(null, HEAD), REQUIRED_CHECKS);
+  assert.deepEqual(missingChecks({ check_runs: [] }, HEAD), REQUIRED_CHECKS);
+});
+
+test('missingChecks ignores same-named runs from another app', () => {
+  const spoofed = REQUIRED_CHECKS.map((n) =>
+    run(n, 'success', '2026-10-28T11:00:00Z', { app: 'evil-app' }),
+  );
+  assert.deepEqual(
+    missingChecks([{ check_runs: spoofed }], HEAD),
+    REQUIRED_CHECKS,
+  );
+  const real = REQUIRED_CHECKS.map((n) => run(n, 'failure'));
+  assert.deepEqual(
+    missingChecks([{ check_runs: [...real, ...spoofed] }], HEAD),
+    REQUIRED_CHECKS,
+  );
+});
+
+test('missingChecks ignores runs for another commit', () => {
+  const other = REQUIRED_CHECKS.map((n) =>
+    run(n, 'success', undefined, { sha: 'f'.repeat(40) }),
+  );
+  assert.deepEqual(
+    missingChecks([{ check_runs: other }], HEAD),
+    REQUIRED_CHECKS,
+  );
+});
+
+test('missingChecks needs the head commit', () => {
+  const pages = [{ check_runs: REQUIRED_CHECKS.map((n) => run(n, 'success')) }];
+  assert.throws(() => missingChecks(pages), /sha/);
+});
+
+test('release.yml lets only the owner or the tag workflow release', () => {
+  const text = readFileSync(
+    new URL('../../.github/workflows/release.yml', import.meta.url),
+    'utf8',
+  );
+  const guard = text.indexOf('- name: Verify who started the release');
+  assert.notEqual(guard, -1);
+  assert.ok(
+    guard < text.indexOf('- uses: actions/checkout'),
+    'guard runs first',
+  );
+  assert.match(text, /ACTOR: \$\{\{ github\.actor \}\}/);
+  assert.match(text, /OWNER: \$\{\{ github\.repository_owner \}\}/);
+  assert.match(text, /"\$ACTOR" != "github-actions\[bot\]"/);
+  assert.match(text, /if: startsWith\(github\.ref, 'refs\/tags\/v'\)/);
 });
 
 test('tag.yml and release.yml pass the workflow policy', () => {

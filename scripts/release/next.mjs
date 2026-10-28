@@ -19,7 +19,8 @@ function channelOf(version, parsed) {
   const [name, number, ...more] = parsed.prerelease;
   const index = CHANNELS.indexOf(name);
   const counter = Number(number);
-  if (index === -1 || index === 2 || more.length > 0 || !(counter >= 1)) {
+  const validCounter = Number.isInteger(counter) && counter > 0;
+  if (index === -1 || index === 2 || more.length > 0 || !validCounter) {
     throw new Error(`Last tag v${version} is not on a known release line`);
   }
   return { index, counter };

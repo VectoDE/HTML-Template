@@ -64,7 +64,7 @@ jobs:
           sha="$(gh api "repos/$REPO/commits/main" --jq .sha)"
           gh api --paginate --slurp "repos/$REPO/commits/$sha/check-runs?per_page=100" \
             > "$RUNNER_TEMP/check-runs.json"
-          failing="$(node scripts/release/guards.mjs checks "$RUNNER_TEMP/check-runs.json")"
+          failing="$(node scripts/release/guards.mjs checks "$RUNNER_TEMP/check-runs.json" "$sha")"
           if [ -n "$failing" ]; then
             skip "required checks on main $sha did not succeed: $failing"
           fi

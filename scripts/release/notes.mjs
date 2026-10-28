@@ -69,11 +69,21 @@ export function renderNotes(commits) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
-    const tag = process.argv[2] ?? '';
-    const range = logRange(listTags(), tag);
+    // Use the tag name as git reports it, never the raw argument.
+    const tags = listTags();
+    const wanted = process.argv[2] ?? '';
+    const tag = tags.find((name) => name === wanted);
+    if (tag === undefined) throw new Error(`Tag "${wanted}" does not exist`);
+    const range = logRange(tags, tag);
     const output = execFileSync(
       gitExecutable(),
-      ['log', '--no-merges', `--format=%H${FIELD}%B${RECORD}`, range],
+      [
+        'log',
+        '--no-merges',
+        `--format=%H${FIELD}%B${RECORD}`,
+        '--end-of-options',
+        range,
+      ],
       { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
     );
     process.stdout.write(`${renderNotes(parseCommitLog(output))}\n`);
