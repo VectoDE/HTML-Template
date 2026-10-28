@@ -100,6 +100,7 @@ jobs:
           mtime="$(git log -1 --format=%ct "$GITHUB_SHA")"
           tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="@${mtime}" \
             -C "$stage" -cf - "$name" | gzip -n > "dist/${name}.tar.gz"
+          echo "path=${stage}/${name}" >> "$GITHUB_OUTPUT"
       - name: Generate SBOM
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
@@ -114,7 +115,8 @@ jobs:
           SBOM: ${{ runner.temp }}/sbom.spdx.json
         run: |
           mv "$SBOM" "dist/html-template-${VERSION}.spdx.json"
-          rm -rf dist/site
+      - name: Drop the built site from the release assets
+        run: rm -rf dist/site
       - name: Hash release assets
         id: hash
         env:

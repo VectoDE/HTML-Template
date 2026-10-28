@@ -34,6 +34,7 @@
         "required_status_checks": [
           { "context": "lint", "integration_id": 15368 },
           { "context": "test", "integration_id": 15368 },
+          { "context": "build", "integration_id": 15368 },
           { "context": "actionlint", "integration_id": 15368 },
           { "context": "dco", "integration_id": 15368 },
           {
