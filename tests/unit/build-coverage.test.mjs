@@ -1,6 +1,13 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import {
+  access,
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { indexBaseline, indexCompat } from '../../scripts/build/compat.mjs';
@@ -347,10 +354,12 @@ test('formatSummary shows counts, versions and the first 50 errors', () => {
 let counter = 0;
 async function project(files = {}) {
   const root = join(base, `case-${counter++}`);
-  await writeTree(root, {
-    [EXCLUSIONS]: '[]\n',
-    ...files,
-  });
+  // A null value leaves that file out; content/coverage/ always exists.
+  const tree = Object.entries({ [EXCLUSIONS]: '[]\n', ...files }).filter(
+    ([, text]) => text !== null,
+  );
+  await writeTree(root, Object.fromEntries(tree));
+  await mkdir(join(root, 'content/coverage'), { recursive: true });
   return root;
 }
 
@@ -466,4 +475,54 @@ test('main reports content errors, bad JSON and unknown flags', async () => {
   const flag = await cli(['--nope'], root);
   assert.equal(flag.code, 1);
   assert.match(flag.err, /--nope/);
+});
+
+const exists = (path) =>
+  access(path).then(
+    () => true,
+    () => false,
+  );
+
+test('main fails when exclusions.json is missing, and --update writes nothing', async () => {
+  const root = await project({ [EXCLUSIONS]: null });
+  const check = await cli([], root);
+  assert.equal(check.code, 1);
+  assert.match(check.err, /content\/coverage\/exclusions\.json is missing/);
+  const update = await cli(['--update'], root);
+  assert.equal(update.code, 1);
+  assert.match(update.err, /exclusions\.json is missing/);
+  assert.equal(await exists(join(root, PENDING)), false);
+  assert.equal(await exists(join(root, CLAIMS)), false);
+});
+
+test('main --update writes nothing while exclusions.json is invalid', async () => {
+  const root = await project({ [EXCLUSIONS]: '[oops' });
+  const { code, err } = await cli(['--update'], root);
+  assert.equal(code, 1);
+  assert.match(err, /exclusions\.json: not valid JSON/);
+  assert.equal(await exists(join(root, PENDING)), false);
+  assert.equal(await exists(join(root, CLAIMS)), false);
+});
+
+test('main --update writes nothing while content fails to load', async () => {
+  const root = await project({
+    [PENDING]: '[]\n',
+    'content/html/dialog/topic.md': '---\ntitle: x\n---\n',
+  });
+  const { code, err } = await cli(['--update'], root);
+  assert.equal(code, 1);
+  assert.match(err, /content\/html\/dialog\/topic\.md/);
+  assert.equal(await readFile(join(root, PENDING), 'utf8'), '[]\n');
+  assert.equal(await exists(join(root, CLAIMS)), false);
+});
+
+test('main --update repairs invalid pending.json and claims.json', async () => {
+  const root = await project({ [PENDING]: '[oops', [CLAIMS]: '{oops' });
+  const { code, err } = await cli(['--update'], root);
+  assert.equal(err, '');
+  assert.equal(code, 0);
+  assert.ok(
+    Array.isArray(JSON.parse(await readFile(join(root, PENDING), 'utf8'))),
+  );
+  assert.equal(await readFile(join(root, CLAIMS), 'utf8'), '{}\n');
 });

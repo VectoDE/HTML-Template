@@ -357,13 +357,16 @@ export function formatSummary(report, versions) {
 
 // --- CLI ------------------------------------------------------------------
 
-async function readJson(root, rel, fallback, errors) {
+// A missing file reads as fallback, unless it is required: then the
+// missing file is an error of its own.
+async function readJson(root, rel, { fallback, required = false }, errors) {
   let text;
   try {
     text = await readFile(join(root, rel), 'utf8');
   } catch (error) {
-    if (error?.code === 'ENOENT') return fallback;
-    throw error;
+    if (error?.code !== 'ENOENT') throw error;
+    if (required) errors.push(`${rel} is missing`);
+    return fallback;
   }
   try {
     return JSON.parse(text);
@@ -402,11 +405,26 @@ export async function main(
     topics: content.topics,
     index,
     baseline,
-    exclusions: await readJson(root, FILES.exclusions, [], inputErrors),
-    pending: await readJson(root, FILES.pending, [], inputErrors),
-    claims: await readJson(root, FILES.claims, {}, inputErrors),
+    exclusions: await readJson(
+      root,
+      FILES.exclusions,
+      { fallback: [], required: true },
+      inputErrors,
+    ),
+    pending: await readJson(root, FILES.pending, { fallback: [] }, inputErrors),
+    claims: await readJson(root, FILES.claims, { fallback: {} }, inputErrors),
   };
-  if (argv.includes('--update')) {
+  // --update rewrites pending.json and claims.json, so their own JSON errors
+  // do not block it. Any other input error does: nothing is written then.
+  const repairable = new Set(
+    [FILES.pending, FILES.claims].map((rel) => `${rel}: not valid JSON`),
+  );
+  const blocking = inputErrors.filter((e) => !repairable.has(e));
+  if (argv.includes('--update') && blocking.length > 0) {
+    inputErrors.push(
+      'coverage --update: nothing written, fix the errors above first',
+    );
+  } else if (argv.includes('--update')) {
     const computed = checkCoverage(input);
     await mkdir(join(root, DIR), { recursive: true });
     await writeFile(
@@ -420,10 +438,7 @@ export async function main(
     input.pending = computed.expectedPending;
     input.claims = plain(computed.expectedClaims);
     // The files just written replace any read error they had.
-    for (const rel of [FILES.pending, FILES.claims]) {
-      const at = inputErrors.indexOf(`${rel}: not valid JSON`);
-      if (at !== -1) inputErrors.splice(at, 1);
-    }
+    inputErrors.length = 0;
   }
   const report = checkCoverage({ ...input, strict });
   report.errors = [...inputErrors, ...report.errors];
