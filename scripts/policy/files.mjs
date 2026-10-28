@@ -1,14 +1,15 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { gitExecutable } from './git.mjs';
 
 // The only files allowed to contain the attribution patterns.
-const ATTRIBUTION_EXCLUDED = [
+const ATTRIBUTION_EXCLUDED = new Set([
   'scripts/policy/attribution.mjs',
   'tests/unit/policy-attribution.test.mjs',
-];
+]);
 
 export function isAttributionExcluded(path) {
-  return ATTRIBUTION_EXCLUDED.includes(path);
+  return ATTRIBUTION_EXCLUDED.has(path);
 }
 
 export function filterAttributionTargets(paths) {
@@ -25,11 +26,11 @@ export function findCrlf(text) {
 
 function globToRegex(glob) {
   const escaped = glob
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-    .replace(/\*\*/g, '\u0000')
-    .replace(/\*/g, '[^/]*')
-    .replace(/\?/g, '[^/]')
-    .replace(/\u0000/g, '.*');
+    .replaceAll(/[.+^${}()|[\]\\]/g, String.raw`\$&`)
+    .replaceAll('**', '')
+    .replaceAll('*', '[^/]*')
+    .replaceAll('?', '[^/]')
+    .replaceAll('', '.*');
   return new RegExp(`^${escaped}$`);
 }
 
@@ -47,7 +48,10 @@ export function isBinaryPath(path, gitattributes) {
 }
 
 export function listTrackedTextFiles() {
-  const out = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' });
+  const out = execFileSync(gitExecutable(), ['ls-files', '-z'], {
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  });
   let attrs = '';
   try {
     attrs = readFileSync('.gitattributes', 'utf8');

@@ -83,3 +83,19 @@ test('job-level write passes when top-level is {}', () => {
   const text = `permissions: {}\njobs:\n  a:\n    permissions:\n      contents: write\n    steps:\n      - uses: actions/checkout@${sha} # v5\n`;
   assert.deepEqual(checkWorkflow(text, 'x.yml'), []);
 });
+
+test('quoted read permission value passes', () => {
+  const text = wf(
+    `actions/checkout@${sha} # v5`,
+    'permissions:\n  contents: "read"',
+  );
+  assert.deepEqual(checkWorkflow(text, 'x.yml'), []);
+});
+
+test('quoted write permission value still fails', () => {
+  const text = wf(
+    `actions/checkout@${sha} # v5`,
+    "permissions:\n  contents: 'write'",
+  );
+  assert.equal(checkWorkflow(text, 'x.yml').length, 1);
+});

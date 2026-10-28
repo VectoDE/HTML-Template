@@ -37,3 +37,9 @@ test('filterAttributionTargets drops excluded files only', () => {
   ];
   assert.deepEqual(filterAttributionTargets(files), ['README.md']);
 });
+
+test('gitExecutable resolves to an existing file', async () => {
+  const { gitExecutable } = await import('../../scripts/policy/git.mjs');
+  const { existsSync } = await import('node:fs');
+  assert.ok(existsSync(gitExecutable()));
+});

@@ -3,19 +3,40 @@ const DOCKER_USE = /^docker:\/\/\S+@sha256:[0-9a-f]{64}$/;
 const SLSA_USE =
   /^slsa-framework\/slsa-github-generator\/\.github\/workflows\/[\w-]+\.yml@v\d+\.\d+\.\d+$/;
 const VERSION_COMMENT = /^\s*#\s*v\d/;
-const USES_LINE = /^\s*(?:-\s*)?uses:\s*(\S+)(.*)$/;
+const USES_KEY = 'uses:';
+
+// Split a "uses:" line into the ref and whatever follows it (comment).
+function parseUsesLine(line) {
+  let text = line.trimStart();
+  if (text.startsWith('-')) text = text.slice(1).trimStart();
+  if (!text.startsWith(USES_KEY)) return null;
+  const value = text.slice(USES_KEY.length).trimStart();
+  if (value === '') return null;
+  const end = value.search(/\s/);
+  return end === -1
+    ? { ref: value, rest: '' }
+    : { ref: value.slice(0, end), rest: value.slice(end) };
+}
 
 function unquote(value) {
-  return value.replace(/^(['"])(.*)\1$/, '$2');
+  const first = value[0];
+  if (
+    value.length >= 2 &&
+    (first === '"' || first === "'") &&
+    value.endsWith(first)
+  ) {
+    return value.slice(1, -1);
+  }
+  return value;
 }
 
 function checkUses(lines, file) {
   const errors = [];
   lines.forEach((line, index) => {
-    const m = USES_LINE.exec(line);
+    const m = parseUsesLine(line);
     if (!m) return;
-    const ref = unquote(m[1]);
-    const rest = m[2];
+    const ref = unquote(m.ref);
+    const rest = m.rest;
     const where = `${file}:${index + 1}`;
     if (ref.startsWith('./')) return;
     if (SLSA_USE.test(ref)) return;
@@ -36,17 +57,18 @@ function checkUses(lines, file) {
 }
 
 function checkPermissions(lines, file) {
-  const start = lines.findIndex((line) => /^permissions:/.test(line));
+  const start = lines.findIndex((line) => line.startsWith('permissions:'));
   if (start === -1) {
     return [
       `${file}:1 missing top-level "permissions:" (use "permissions: {}" or read-only)`,
     ];
   }
   const where = `${file}:${start + 1}`;
-  const inline = lines[start]
-    .replace(/^permissions:/, '')
-    .replace(/\s+#.*$/, '')
-    .trim();
+  const afterKey = lines[start].slice('permissions:'.length);
+  const commentAt = afterKey.search(/\s#/);
+  const inline = (
+    commentAt === -1 ? afterKey : afterKey.slice(0, commentAt)
+  ).trim();
   if (inline === '{}' || inline === 'read-all') return [];
   if (inline !== '') {
     return [
@@ -59,7 +81,8 @@ function checkPermissions(lines, file) {
     if (line.trim() === '' || /^\s*#/.test(line)) continue;
     if (!/^\s+/.test(line)) break;
     const m = /^\s+([\w-]+):\s*([^\s#]+)/.exec(line);
-    if (m && m[2] !== 'read' && m[2] !== 'none') {
+    const value = m ? unquote(m[2]) : '';
+    if (m && value !== 'read' && value !== 'none') {
       errors.push(
         `${file}:${i + 1} top-level permission "${m[1]}: ${m[2]}" must be read or none`,
       );

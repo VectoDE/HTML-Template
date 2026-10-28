@@ -1,14 +1,33 @@
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
+import { gitExecutable } from './git.mjs';
 
 const BOT_NAMES = new Set(['dependabot[bot]', 'github-actions[bot]']);
 const BOT_EMAIL_SUFFIX = '[bot]@users.noreply.github.com';
 
+const SIGN_OFF_PREFIX = 'Signed-off-by:';
+
+function parseSignOff(line) {
+  if (!line.startsWith(SIGN_OFF_PREFIX)) return null;
+  const rest = line.slice(SIGN_OFF_PREFIX.length).trimEnd();
+  if (rest.trimStart() === rest || !rest.endsWith('>')) return null;
+  const open = rest.lastIndexOf('<');
+  if (open < 2 || rest.slice(open + 1, -1).includes('>')) return null;
+  if (rest[open - 1].trim() !== '') return null;
+  const name = rest.slice(0, open).trim();
+  if (name === '') return null;
+  return { name, email: rest.slice(open + 1, -1) };
+}
+
 function hasSignOff({ authorName, authorEmail, message }) {
   const wanted = authorEmail.toLowerCase();
   return message.split(/\r?\n/).some((line) => {
-    const m = /^Signed-off-by:\s+(.+?)\s+<([^<>]*)>\s*$/.exec(line);
-    return m !== null && m[1] === authorName && m[2].toLowerCase() === wanted;
+    const parsed = parseSignOff(line);
+    return (
+      parsed !== null &&
+      parsed.name === authorName &&
+      parsed.email.toLowerCase() === wanted
+    );
   });
 }
 
@@ -57,9 +76,9 @@ function main() {
     process.exit(2);
   }
   const output = execFileSync(
-    'git',
+    gitExecutable(),
     ['log', '--format=%H%x1f%an%x1f%ae%x1f%P%x1f%B%x1e', `${base}..${head}`],
-    { encoding: 'utf8' },
+    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
   );
   const commits = parseGitLog(output);
   const errors = checkDco(commits);
@@ -71,4 +90,5 @@ function main() {
   console.log(`dco: ok (${commits.length} commits checked)`);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) main();
+const entry = process.argv[1];
+if (entry && import.meta.url === pathToFileURL(entry).href) main();
