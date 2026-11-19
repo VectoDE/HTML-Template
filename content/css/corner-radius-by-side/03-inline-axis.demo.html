@@ -1,0 +1,31 @@
+<script type="application/json" data-demo-meta>
+  {
+    "title": "Round the start or end of the inline axis",
+    "summary": "Use border-inline-start-radius and border-inline-end-radius to round the leading or the trailing side of text. In right-to-left text the rounded side flips without any extra rule, which suits tabs, tags and chat bubbles.",
+    "a11y": "Rounding is decoration only. The text keeps its contrast and the labels stay readable in every browser.",
+    "fallback": "Browsers without these properties draw the boxes with square corners. The labels still describe what the shape should be.",
+    "features": [
+      "css.properties.border-inline-start-radius",
+      "css.properties.border-inline-end-radius"
+    ],
+    "detect": "CSS.supports('border-inline-start-radius', '8px')",
+    "runsIn": "frame"
+  }
+</script>
+
+<template data-lang="html">
+  <div class="row">
+    <p class="box start" dir="ltr">ltr, inline start</p>
+    <p class="box start" dir="rtl">rtl, inline start</p>
+    <p class="box end" dir="ltr">ltr, inline end</p>
+    <p class="box end" dir="rtl">rtl, inline end</p>
+  </div>
+</template>
+
+<template data-lang="css">
+  .row { display: flex; flex-wrap: wrap; gap: 1rem; font: 0.875rem/1.3
+  system-ui, sans-serif; } .box { margin: 0; padding: 1.5rem 1rem;
+  min-inline-size: 9rem; color: #111; background: #ffe7c2; border: 2px solid
+  #8a5200; } .start { border-inline-start-radius: 1.5rem; } .end {
+  border-inline-end-radius: 1.5rem; }
+</template>

@@ -1,1 +1,362 @@
-{}
+{
+  "api.EXT_clip_control": {
+    "baseline": null,
+    "key": "api.EXT_clip_control",
+    "mdn": null,
+    "spec": [
+      "https://registry.khronos.org/webgl/extensions/EXT_clip_control/"
+    ],
+    "status": {
+      "deprecated": false,
+      "experimental": false,
+      "standard": true
+    },
+    "support": {
+      "chrome": {
+        "added": "122"
+      },
+      "chrome_android": {
+        "added": "122"
+      },
+      "edge": {
+        "added": "122"
+      },
+      "firefox": {
+        "added": "159"
+      },
+      "firefox_android": {
+        "added": "159"
+      },
+      "safari": {
+        "added": "17.4"
+      },
+      "safari_ios": {
+        "added": "17.4"
+      }
+    }
+  },
+  "api.EXT_texture_mirror_clamp_to_edge": {
+    "baseline": null,
+    "key": "api.EXT_texture_mirror_clamp_to_edge",
+    "mdn": null,
+    "spec": [
+      "https://registry.khronos.org/webgl/extensions/EXT_texture_mirror_clamp_to_edge/"
+    ],
+    "status": {
+      "deprecated": false,
+      "experimental": false,
+      "standard": true
+    },
+    "support": {
+      "chrome": {
+        "added": "124"
+      },
+      "chrome_android": {
+        "added": "124"
+      },
+      "edge": {
+        "added": "124"
+      },
+      "firefox": {
+        "added": "160"
+      },
+      "firefox_android": {
+        "added": "160"
+      },
+      "safari": {
+        "added": "18"
+      },
+      "safari_ios": {
+        "added": "18"
+      }
+    }
+  },
+  "css.properties.border-block-end-radius": {
+    "baseline": null,
+    "key": "css.properties.border-block-end-radius",
+    "mdn": null,
+    "spec": [
+      "https://drafts.csswg.org/css-borders-4/#propdef-border-block-end-radius"
+    ],
+    "status": {
+      "deprecated": false,
+      "experimental": true,
+      "standard": true
+    },
+    "support": {
+      "chrome": {
+        "added": false
+      },
+      "chrome_android": {
+        "added": false
+      },
+      "edge": {
+        "added": false
+      },
+      "firefox": {
+        "added": false
+      },
+      "firefox_android": {
+        "added": false
+      },
+      "safari": {
+        "added": "preview"
+      },
+      "safari_ios": {
+        "added": false
+      }
+    }
+  },
+  "css.properties.border-block-start-radius": {
+    "baseline": null,
+    "key": "css.properties.border-block-start-radius",
+    "mdn": null,
+    "spec": [
+      "https://drafts.csswg.org/css-borders-4/#propdef-border-block-start-radius"
+    ],
+    "status": {
+      "deprecated": false,
+      "experimental": true,
+      "standard": true
+    },
+    "support": {
+      "chrome": {
+        "added": false
+      },
+      "chrome_android": {
+        "added": false
+      },
+      "edge": {
+        "added": false
+      },
+      "firefox": {
+        "added": false
+      },
+      "firefox_android": {
+        "added": false
+      },
+      "safari": {
+        "added": "preview"
+      },
+      "safari_ios": {
+        "added": false
+      }
+    }
+  },
+  "css.properties.border-bottom-radius": {
+    "baseline": null,
+    "key": "css.properties.border-bottom-radius",
+    "mdn": null,
+    "spec": [
+      "https://drafts.csswg.org/css-borders-4/#propdef-border-bottom-radius"
+    ],
+    "status": {
+      "deprecated": false,
+      "experimental": true,
+      "standard": true
+    },
+    "support": {
+      "chrome": {
+        "added": false
+      },
+      "chrome_android": {
+        "added": false
+      },
+      "edge": {
+        "added": false
+      },
+      "firefox": {
+        "added": false
+      },
+      "firefox_android": {
+        "added": false
+      },
+      "safari": {
+        "added": "preview"
+      },
+      "safari_ios": {
+        "added": false
+      }
+    }
+  },
+  "css.properties.border-inline-end-radius": {
+    "baseline": null,
+    "key": "css.properties.border-inline-end-radius",
+    "mdn": null,
+    "spec": [
+      "https://drafts.csswg.org/css-borders-4/#propdef-border-inline-end-radius"
+    ],
+    "status": {
+      "deprecated": false,
+      "experimental": true,
+      "standard": true
+    },
+    "support": {
+      "chrome": {
+        "added": false
+      },
+      "chrome_android": {
+        "added": false
+      },
+      "edge": {
+        "added": false
+      },
+      "firefox": {
+        "added": false
+      },
+      "firefox_android": {
+        "added": false
+      },
+      "safari": {
+        "added": "preview"
+      },
+      "safari_ios": {
+        "added": false
+      }
+    }
+  },
+  "css.properties.border-inline-start-radius": {
+    "baseline": null,
+    "key": "css.properties.border-inline-start-radius",
+    "mdn": null,
+    "spec": [
+      "https://drafts.csswg.org/css-borders-4/#propdef-border-inline-start-radius"
+    ],
+    "status": {
+      "deprecated": false,
+      "experimental": true,
+      "standard": true
+    },
+    "support": {
+      "chrome": {
+        "added": false
+      },
+      "chrome_android": {
+        "added": false
+      },
+      "edge": {
+        "added": false
+      },
+      "firefox": {
+        "added": false
+      },
+      "firefox_android": {
+        "added": false
+      },
+      "safari": {
+        "added": "preview"
+      },
+      "safari_ios": {
+        "added": false
+      }
+    }
+  },
+  "css.properties.border-left-radius": {
+    "baseline": null,
+    "key": "css.properties.border-left-radius",
+    "mdn": null,
+    "spec": [
+      "https://drafts.csswg.org/css-borders-4/#propdef-border-left-radius"
+    ],
+    "status": {
+      "deprecated": false,
+      "experimental": true,
+      "standard": true
+    },
+    "support": {
+      "chrome": {
+        "added": false
+      },
+      "chrome_android": {
+        "added": false
+      },
+      "edge": {
+        "added": false
+      },
+      "firefox": {
+        "added": false
+      },
+      "firefox_android": {
+        "added": false
+      },
+      "safari": {
+        "added": "preview"
+      },
+      "safari_ios": {
+        "added": false
+      }
+    }
+  },
+  "css.properties.border-right-radius": {
+    "baseline": null,
+    "key": "css.properties.border-right-radius",
+    "mdn": null,
+    "spec": [
+      "https://drafts.csswg.org/css-borders-4/#propdef-border-right-radius"
+    ],
+    "status": {
+      "deprecated": false,
+      "experimental": true,
+      "standard": true
+    },
+    "support": {
+      "chrome": {
+        "added": false
+      },
+      "chrome_android": {
+        "added": false
+      },
+      "edge": {
+        "added": false
+      },
+      "firefox": {
+        "added": false
+      },
+      "firefox_android": {
+        "added": false
+      },
+      "safari": {
+        "added": "preview"
+      },
+      "safari_ios": {
+        "added": false
+      }
+    }
+  },
+  "css.properties.border-top-radius": {
+    "baseline": null,
+    "key": "css.properties.border-top-radius",
+    "mdn": null,
+    "spec": [
+      "https://drafts.csswg.org/css-borders-4/#propdef-border-top-radius"
+    ],
+    "status": {
+      "deprecated": false,
+      "experimental": true,
+      "standard": true
+    },
+    "support": {
+      "chrome": {
+        "added": false
+      },
+      "chrome_android": {
+        "added": false
+      },
+      "edge": {
+        "added": false
+      },
+      "firefox": {
+        "added": false
+      },
+      "firefox_android": {
+        "added": false
+      },
+      "safari": {
+        "added": "preview"
+      },
+      "safari_ios": {
+        "added": false
+      }
+    }
+  }
+}

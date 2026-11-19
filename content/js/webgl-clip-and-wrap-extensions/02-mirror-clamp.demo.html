@@ -1,0 +1,39 @@
+<script type="application/json" data-demo-meta>
+  {
+    "title": "Use the mirror-clamp wrap mode",
+    "summary": "Request EXT_texture_mirror_clamp_to_edge, set MIRROR_CLAMP_TO_EDGE_EXT as the wrap mode of a texture and check that the context accepted it. Use it for filters that sample slightly outside an image.",
+    "a11y": "The result is written to an output element that is announced politely, and the button is a real button with a visible focus ring.",
+    "fallback": "Where the extension is missing the page says so and the texture keeps the default clamp mode. Nothing throws.",
+    "features": ["api.EXT_texture_mirror_clamp_to_edge"],
+    "detect": "!!document.createElement('canvas').getContext('webgl')?.getExtension('EXT_texture_mirror_clamp_to_edge')",
+    "runsIn": "frame"
+  }
+</script>
+
+<template data-lang="html">
+  <button type="button" id="run">Set mirror-clamp wrapping</button>
+  <output id="out" aria-live="polite">Not run yet.</output>
+</template>
+
+<template data-lang="css">
+  body { font: 1rem/1.4 system-ui, sans-serif; } button:focus-visible { outline:
+  3px solid #1f4e9c; outline-offset: 2px; } output { display: block;
+  margin-block-start: 0.75rem; }
+</template>
+
+<template data-lang="js">
+  const out = document.querySelector('#out');
+  document.querySelector('#run').addEventListener('click', () => { const gl =
+  document.createElement('canvas').getContext('webgl'); if (!gl) {
+  out.textContent = 'WebGL is not available here.'; return; } const ext =
+  gl.getExtension('EXT_texture_mirror_clamp_to_edge'); if (!ext) {
+  out.textContent = 'EXT_texture_mirror_clamp_to_edge is not offered by this
+  browser or graphics driver.'; return; } const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture); gl.texParameteri(gl.TEXTURE_2D,
+  gl.TEXTURE_WRAP_S, ext.MIRROR_CLAMP_TO_EDGE_EXT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,
+  ext.MIRROR_CLAMP_TO_EDGE_EXT); const accepted = gl.getError() === gl.NO_ERROR
+  && gl.getTexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S) ===
+  ext.MIRROR_CLAMP_TO_EDGE_EXT; out.textContent = accepted ? 'The texture now
+  wraps with mirror-clamp.' : 'The context rejected the wrap mode.'; });
+</template>
