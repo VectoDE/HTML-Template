@@ -28,6 +28,9 @@
     "coverage": "node scripts/build/coverage.mjs",
     "coverage:update": "node scripts/build/coverage.mjs --update"
   },
+  "overrides": {
+    "minimatch": "11.0.1"
+  },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@mdn/browser-compat-data": "8.1.7",
