@@ -4,7 +4,10 @@
     "summary": "Use border-block-start-radius and border-block-end-radius to round the two corners at the start or the end of the block axis. The pair turns with writing-mode, so the same rule rounds the top in horizontal text and the right side in vertical-rl text.",
     "a11y": "Rounding is decoration only. The text keeps its contrast and the labels stay readable in every browser.",
     "fallback": "Browsers without these properties draw the boxes with square corners. The labels still describe what the shape should be.",
-    "features": ["css.properties.border-block-start-radius", "css.properties.border-block-end-radius"],
+    "features": [
+      "css.properties.border-block-start-radius",
+      "css.properties.border-block-end-radius"
+    ],
     "detect": "CSS.supports('border-block-start-radius', '8px')",
     "runsIn": "frame"
   }
@@ -19,28 +22,9 @@
 </template>
 
 <template data-lang="css">
-  .row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    font: 0.875rem/1.3 system-ui, sans-serif;
-  }
-  .box {
-    margin: 0;
-    padding: 1rem;
-    min-inline-size: 9rem;
-    color: #111;
-    background: #d9f2dc;
-    border: 2px solid #23693a;
-  }
-  .start {
-    border-block-start-radius: 1.5rem;
-  }
-  .end {
-    border-block-end-radius: 1.5rem;
-  }
-  .vertical {
-    writing-mode: vertical-rl;
-    min-block-size: 9rem;
-  }
+  .row { display: flex; flex-wrap: wrap; gap: 1rem; font: 0.875rem/1.3
+  system-ui, sans-serif; } .box { margin: 0; padding: 1rem; min-inline-size:
+  9rem; color: #111; background: #d9f2dc; border: 2px solid #23693a; } .start {
+  border-block-start-radius: 1.5rem; } .end { border-block-end-radius: 1.5rem; }
+  .vertical { writing-mode: vertical-rl; min-block-size: 9rem; }
 </template>

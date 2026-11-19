@@ -16,37 +16,21 @@
 </template>
 
 <template data-lang="css">
-  body {
-    font: 1rem/1.4 system-ui, sans-serif;
-  }
-  button:focus-visible {
-    outline: 3px solid #1f4e9c;
-    outline-offset: 2px;
-  }
-  output {
-    display: block;
-    margin-block-start: 0.75rem;
-    white-space: pre-wrap;
-  }
+  body { font: 1rem/1.4 system-ui, sans-serif; } button:focus-visible { outline:
+  3px solid #1f4e9c; outline-offset: 2px; } output { display: block;
+  margin-block-start: 0.75rem; white-space: pre-wrap; }
 </template>
 
 <template data-lang="js">
   const out = document.querySelector('#out');
-
-  document.querySelector('#run').addEventListener('click', () => {
-    const gl = document.createElement('canvas').getContext('webgl2');
-    if (!gl) {
-      out.textContent = 'WebGL 2 is not available here.';
-      return;
-    }
-    const ext = gl.getExtension('EXT_clip_control');
-    if (!ext) {
-      out.textContent = 'EXT_clip_control is not offered by this browser or graphics driver.';
-      return;
-    }
-    ext.clipControl(ext.UPPER_LEFT_EXT, ext.ZERO_TO_ONE_EXT);
-    const origin = gl.getParameter(ext.CLIP_ORIGIN_EXT) === ext.UPPER_LEFT_EXT ? 'upper left' : 'lower left';
-    const depth = gl.getParameter(ext.CLIP_DEPTH_MODE_EXT) === ext.ZERO_TO_ONE_EXT ? '0 to 1' : '-1 to 1';
-    out.textContent = `Clip origin: ${origin}\nDepth range: ${depth}`;
-  });
+  document.querySelector('#run').addEventListener('click', () => { const gl =
+  document.createElement('canvas').getContext('webgl2'); if (!gl) {
+  out.textContent = 'WebGL 2 is not available here.'; return; } const ext =
+  gl.getExtension('EXT_clip_control'); if (!ext) { out.textContent =
+  'EXT_clip_control is not offered by this browser or graphics driver.'; return;
+  } ext.clipControl(ext.UPPER_LEFT_EXT, ext.ZERO_TO_ONE_EXT); const origin =
+  gl.getParameter(ext.CLIP_ORIGIN_EXT) === ext.UPPER_LEFT_EXT ? 'upper left' :
+  'lower left'; const depth = gl.getParameter(ext.CLIP_DEPTH_MODE_EXT) ===
+  ext.ZERO_TO_ONE_EXT ? '0 to 1' : '-1 to 1'; out.textContent = `Clip origin:
+  ${origin}\nDepth range: ${depth}`; });
 </template>
