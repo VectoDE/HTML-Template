@@ -2,6 +2,9 @@ name: tmp-coverage-update
 
 on:
   workflow_dispatch:
+  push:
+    branches: [dependabot/npm_and_yarn/minor-and-patch-e97ed01910]
+    paths: [.github/workflows/tmp-coverage-update.yml]
 
 permissions: {}
 
