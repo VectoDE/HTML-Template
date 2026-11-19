@@ -1,0 +1,49 @@
+<script type="application/json" data-demo-meta>
+  {
+    "title": "Round one physical side",
+    "summary": "Use border-top-radius, border-right-radius, border-bottom-radius or border-left-radius to round the two corners on that side of the box. Reach for them when the shape is tied to the screen, such as a sheet attached to the bottom edge.",
+    "a11y": "Rounding is decoration only. The text keeps its contrast and the labels stay readable in every browser.",
+    "fallback": "Browsers without these properties draw the boxes with square corners. The labels still describe what the shape should be.",
+    "features": ["css.properties.border-top-radius", "css.properties.border-right-radius", "css.properties.border-bottom-radius", "css.properties.border-left-radius"],
+    "detect": "CSS.supports('border-top-radius', '8px')",
+    "runsIn": "frame"
+  }
+</script>
+
+<template data-lang="html">
+  <div class="row">
+    <p class="box top">border-top-radius</p>
+    <p class="box right">border-right-radius</p>
+    <p class="box bottom">border-bottom-radius</p>
+    <p class="box left">border-left-radius</p>
+  </div>
+</template>
+
+<template data-lang="css">
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font: 0.875rem/1.3 system-ui, sans-serif;
+  }
+  .box {
+    margin: 0;
+    padding: 1.5rem 1rem;
+    min-inline-size: 9rem;
+    color: #111;
+    background: #cfe3ff;
+    border: 2px solid #1f4e9c;
+  }
+  .top {
+    border-top-radius: 1.5rem;
+  }
+  .right {
+    border-right-radius: 1.5rem;
+  }
+  .bottom {
+    border-bottom-radius: 1.5rem;
+  }
+  .left {
+    border-left-radius: 1.5rem;
+  }
+</template>
